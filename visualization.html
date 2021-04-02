@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v6.js"></script>
+  </head>
+  <body>
+    <h1>Women In Hollywood</h1>
+    <h2>What is the Bechdel Test?</h2>
+    <p>blah </p>
+
+    <h2>What was your favorite childhood movie?</h2>
+    <input></input> 
+
+
+
+    <div id="line_chart" style="width:520px;height:420px;">
+      <!-- This is where we will put our chart. -->
+    </div>
+    <style>
+      .selected {
+        opacity: 1 !important;
+        stroke: black;
+        stroke-width: 1px;
+      }
+    </style>
+
+    <script>
+        // Load data from a URL. You can also have the json file downloaded.
+        // See https://github.com/d3/d3/blob/master/API.md#fetches-d3-fetch for more options.
+
+        // set the dimensions and margins of the graph
+        var margin = {top: 10, right: 30, bottom: 30, left: 60},
+            width = 460 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svg = d3.select("#line_chart")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        //Read the data
+        d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
+            .then(function (movies) {
+                moviesPerYear = [];
+                moviesPassedPerYear =[];
+                moviesPercentPassed = [];
+                for (year=1973; year<=2013; year++) {
+                    moviesInYear = movies.filter(mov => mov.year === year);
+                    numMovies = moviesInYear.length;
+                    moviesPassedInYear = movies.filter(mov => mov.year === year && mov.binary==="PASS");
+                    numMoviesPassed = moviesPassedInYear.length;
+                    
+                    moviesPerYear.push(numMovies);
+                    moviesPassedPerYear.push(numMoviesPassed);
+                    moviesPercentPassed.push(numMoviesPassed/numMovies);
+                }
+
+                // Add X axis --> the years
+                var x = d3.scaleLinear()
+                .domain([0, 41])
+                .range([ 0, width ]);
+                svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+                // Add Y axis
+                var y = d3.scaleLinear()
+                .domain([0, 1])
+                .range([ height, 0 ]);
+                svg.append("g")
+                .call(d3.axisLeft(y));
+
+                // Add the line
+                svg.append("path")
+                .datum(moviesPercentPassed)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 1.5)
+                .attr("d", d3.line()
+                    .x(function(d, i ) { return x(i) })
+                    .y(function(d) { return y(d) })
+                    )
+
+                console.log("movies passed", moviesPercentPassed);
+            });
+
+      </script>
+  </body>
+
+  <!-- This adapted from Arvind's observable from lecture. https://observablehq.com/d/4c93c3a516d35624 -->
+  <!-- Great D3 intro resource: https://observablehq.com/@d3/learn-d3?collection=@d3/learn-d3 -->
+</html>
