@@ -30,7 +30,7 @@
 
         // set the dimensions and margins of the graph
         var margin = {top: 10, right: 30, bottom: 30, left: 60},
-            width = 460 - margin.left - margin.right,
+            width = 900 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
@@ -45,6 +45,7 @@
         //Read the data
         d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
             .then(function (movies) {
+                years = [];
                 moviesPerYear = [];
                 moviesPassedPerYear =[];
                 moviesPercentPassed = [];
@@ -57,33 +58,38 @@
                     moviesPerYear.push(numMovies);
                     moviesPassedPerYear.push(numMoviesPassed);
                     moviesPercentPassed.push(numMoviesPassed/numMovies);
+                    movies.push(year);
                 }
 
                 // Add X axis --> the years
                 var x = d3.scaleLinear()
-                .domain([0, 41])
-                .range([ 0, width ]);
+                  .domain([1973, 2013])
+                  .range([ 0, width ]);
                 svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x));
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+                var indexToYear = d3.scaleLinear()
+                  .domain([0, 41])
+                  .range([1973, 2013])
 
                 // Add Y axis
                 var y = d3.scaleLinear()
-                .domain([0, 1])
-                .range([ height, 0 ]);
+                  .domain([0, 1])
+                  .range([ height, 0 ]);
                 svg.append("g")
-                .call(d3.axisLeft(y));
+                  .call(d3.axisLeft(y).tickFormat(function (d) { return d*100 + "%" }));
 
                 // Add the line
                 svg.append("path")
-                .datum(moviesPercentPassed)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 1.5)
-                .attr("d", d3.line()
-                    .x(function(d, i ) { return x(i) })
+                  .datum(moviesPercentPassed)
+                  .attr("fill", "none")
+                  .attr("stroke", "steelblue")
+                  .attr("stroke-width", 1.5)
+                  .attr("d", d3.line()
+                    .x(function(d, i ) { return x(indexToYear(i)) })
                     .y(function(d) { return y(d) })
-                    )
+                  )
 
                 console.log("movies passed", moviesPercentPassed);
             });
