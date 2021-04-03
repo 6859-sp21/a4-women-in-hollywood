@@ -20,9 +20,20 @@
     <h2>Bubble Chart</h2>
     <p>Year: 1990 (change this later on)</p>
 
-    <div id="bubble_chart" style="width:520px;height:420px;">
-        <!-- This is where we will put our chart. -->
+    <div class="two-col">
+        <div id="bubble_chart" style="width:520px;height:420px;">
+            <!-- This is where we will put our chart. -->
+        </div>
+        <div id="bubble_legend" style="width:320px;height:420px;">
+            <!-- This is where we will put our chart. -->
+        </div>
     </div>
+    <style>
+        .two-col {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
 
     <style>
       .selected {
@@ -106,18 +117,20 @@
         var bubble_chart_width = 520,
             bubble_chart_height = 420,
             padding = 1.5, // separation between same-color nodes
-            clusterPadding = 6, // separation between different-color nodes
-            maxRadius = 12;
-        
-            var w = 520, h = 420;
+            clusterPadding = 6; // separation between different-color nodes
+           
+        var w = bubble_chart_width, h = bubble_chart_height;
     
-        var radius = 25;
         // var color = d3.scaleOrdinal(d3.schemeCategory20);
         var centerScale = d3.scalePoint().padding(1).range([0, w]);
         var forceStrength = 5;
         
         var bubble_chart_svg = d3.select("#bubble_chart").append("svg")
             .attr("width", w)
+            .attr("height", h)
+        
+        var bubble_legend_svg = d3.select("#bubble_legend").append("svg")
+            .attr("width", 320)
             .attr("height", h)
 
         var simulation = d3.forceSimulation()
@@ -128,49 +141,224 @@
                 .force("y", d3.forceY().y(h / 2))
                 .force("x", d3.forceX().x(w / 2))
             
+        bubble_chart_svg.append("text")
+            .attr("x", (width / 2))             
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")  
+            .style("font-size", "16px") 
+            .text("Movies In Year");
+
         d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
             .then(function(movies) {
                 movies = movies.filter(mov => mov.year === 1990);
 
                 movies.forEach(function(movie){
-                    movie.r = movie.intgross*0.0000001;
+                    movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
                     movie.x = w / 2;
                     movie.y = h / 2;
                 })
 
-                console.log(movies);
+                function setScale(value) {
+                    return Math.sqrt(value*0.00001 / Math.PI)
+                }
+
+                // Add a scale for bubble color
+                function setColor(d) {
+                    return d.binary =="PASS"? "#71c788" : "#b85b56";
+                };
 
                 var circles = bubble_chart_svg.selectAll("circle")
                     .data(movies, function(d){ return d.imdb ;});
+                
                 console.log("circles", circles);
                 
                 var circlesEnter = circles.enter().append("circle")
+                    .attr("class", function(d) { return "bubbles " + d.binary })
                     .attr("r", function(d, i){ return d.r; })
                     .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
                             .attr("cy", function(d, i){ return 250; })
-                    .style("fill", function(d, i){ return d.binary=="PASS"? "#71c788" : "#b85b56"; })
-                    .style("stroke", function(d, i){ return d.binary=="PASS"? "#71c788" : "#b85b56"; })
-                    .style("stroke-width", 10)
+                    .style("fill", function(d, i){ return setColor(d) })
+                    .style("stroke", function(d, i){ return setColor(d) })
+                    .style("stroke-width", 1)
                     .style("pointer-events", "all")
                     .call(d3.drag()
                             .on("start", dragstarted)
                             .on("drag", dragged)
-                            .on("end", dragended));
+                            .on("end", dragended))
+                    .on("click", clicked)
+                    .on("mouseover", showTooltip )
+                    .on("mousemove", moveTooltip )
+                    .on("mouseleave", hideTooltip )
                 
                 circles = circles.merge(circlesEnter)
+
+                let texts = bubble_chart_svg.selectAll(null)
+                    .data(movies)
+                    .enter()
+                    .append('text')
+                    .text(d => {
+                        var txt = document.createElement("textarea");
+                        txt.innerHTML = d.title;
+                        return txt.value;
+                    })
+                    .attr('color', 'white')
+                    .attr('font-size', 10)
+                    .attr('text-anchor', 'middle')
                 
+                //tooltips
+                var tooltip = d3.select("#bubble_chart")
+                    .append("div")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("background-color", "black")
+                    .style("border-radius", "5px")
+                    .style("padding", "10px")
+                    .style("color", "white")       
+                
+                var showTooltip = function(d) {
+                    tooltip
+                        .transition()
+                        .duration(200)
+                    tooltip
+                        .style("opacity", 1)
+                        .html(d.title)
+                        .style("left", (d3.mouse(this)[0]+30) + "px")
+                        .style("top", (d3.mouse(this)[1]+30) + "px")
+                }
+
+                var moveTooltip = function(d) {
+                    tooltip
+                    .style("left", (d3.mouse(this)[0]+30) + "px")
+                    .style("top", (d3.mouse(this)[1]+30) + "px")
+                }
+                var hideTooltip = function(d) {
+                    tooltip
+                    .transition()
+                    .duration(200)
+                    .style("opacity", 0)
+                }    
+                
+
+                // legend
+                var valuesToShow = [10000000, 100000000, 1000000000]
+                var xCircle = 100
+                var xLabel = 240
+                bubble_legend_svg
+                    .selectAll("legend")
+                    .data(valuesToShow)
+                    .enter()
+                    .append("circle")
+                        .attr("cx", xCircle)
+                        .attr("cy", function(d){ return height - 100 - setScale(d) } )
+                        .attr("r", function(d){ return setScale(d) })
+                        .style("fill", "none")
+                        .attr("stroke", "black")
+
+                // Add legend: segments
+                bubble_legend_svg
+                    .selectAll("legend")
+                    .data(valuesToShow)
+                    .enter()
+                    .append("line")
+                        .attr('x1', function(d){ return xCircle + setScale(d)} )
+                        .attr('x2', xLabel)
+                        .attr('y1', function(d){ return height - 100 - setScale(d) } )
+                        .attr('y2', function(d){ return height - 100 - setScale(d) } )
+                        .attr('stroke', 'black')
+                        .style('stroke-dasharray', ('2,2'))
+
+                // Add legend: labels
+                bubble_legend_svg
+                    .selectAll("legend")
+                    .data(valuesToShow)
+                    .enter()
+                    .append("text")
+                        .attr('x', xLabel)
+                        .attr('y', function(d){ return height - 100 - setScale(d) } )
+                        .text( function(d){ return d/1000000 } )
+                        .style("font-size", 10)
+                        .attr('alignment-baseline', 'middle')
+
+                // Legend title
+                bubble_legend_svg.append("text")
+                    .attr('x', xCircle)
+                    .attr("y", height - 100 +30)
+                    .text("International Gross (M)")
+                    .attr("text-anchor", "middle")
+
+                // Add one dot in the legend for each name.
+                var size = 20
+                var allgroups = ["PASS", "FAIL"]
+                bubble_legend_svg.selectAll("myrect")
+                    .data(allgroups)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", 100)
+                    .attr("cy", function(d,i){ return 100 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                    .attr("r", 7)
+                    .style("fill", function(d){
+                        return d=="PASS"? "#71c788" : "#b85b56";})
+                    .on("click", highlight)
+                    // .on('mouseover', console.log("AHA"))
+                    .on("mouseleave", noHighlight)
+
+                // Add labels beside legend dots
+                bubble_legend_svg.selectAll("mylabels")
+                    .data(allgroups)
+                    .enter()
+                    .append("text")
+                    .attr("x", 100 + size*.8)
+                    .attr("y", function(d,i){ return 90 + i * (size + 5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                    .style("fill", function(d){ return d=="PASS"? "#71c788" : "#b85b56"})
+                    .text(function(d){ return d})
+                    .attr("text-anchor", "left")
+                    .style("alignment-baseline", "middle")
+                    .on("mouseover", highlight)
+                    .on("mouseleave", noHighlight)
+
+                // highlight
+                // What to do when one group is hovered
+                var highlight = function(d){
+                    console.log("highlight?")
+                    // reduce opacity of all groups
+                    d3.selectAll(".bubbles").style("opacity", .05)
+                    // except the one that is hovered
+                    d3.selectAll("."+d).style("opacity", 1)
+                }
+
+                // And when it is not hovered anymore
+                var noHighlight = function(d){
+                    d3.selectAll(".bubbles").style("opacity", 1)
+                }
+
+
                 function ticked() {
                     console.log("tick")
                     //console.log(data.map(function(d){ return d.x; }));
                     circles
                         .attr("cx", function(d){ return d.x; })
                         .attr("cy", function(d){ return d.y; });
+                    texts.attr('x', (data) => {
+                        return data.x
+                        })
+                        .attr('y', (data) => {
+                            return data.y
+                        });
                 }   
 
                 simulation
                         .nodes(movies)
                         .on("tick", ticked);
                 
+
+                function clicked(event, d) {
+                    d3.select(this).transition()
+                        .attr("r", d.r * 2)
+                        .style("stroke", "black")
+                    .transition()
+                        .attr("r", d.r);
+                }
+
                 function dragstarted(mouse,node) {
                     console.log("dragstarted ", "movie", node, "d", mouse)
                     if (!mouse.active) simulation.alpha(1).restart();
@@ -192,8 +380,6 @@
                     var me = d3.select(this)
                     console.log(me.classed("selected"))
                     me.classed("selected", !me.classed("selected"))
-                    d3.selectAll("circle")
-                    .style("fill", function(d, i){ return d.binary=="PASS"? "#71c788" : "#b85b56"; })
                     
                 } 
                 
