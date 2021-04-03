@@ -57,7 +57,7 @@
           .then(function (movies) {            
             console.log("movies", movies[0]);
             years = [];
-            yearRange = [2000, 2013]
+            yearRange = [1973, 2013]
             moviesPerYear = [];
             moviesPassedPerYear =[];
             moviesPercentPassed = [];
@@ -131,7 +131,7 @@
                 // console.log("Index", year)
                 return 0.7
               }
-              return 0;
+              return 0.25;
             };
 
             function chartsDataJoin(rawData = gapminder) {
@@ -139,7 +139,7 @@
             };
 
             const symbol = d3.symbol();
-            function dataJoin(rawData = gapminder) {
+            function dataJoin(rawData = movies) {
               // const data = rawData.filter(d => d.year === year);
 
               g.selectAll('path')
@@ -151,6 +151,7 @@
                 .attr('fill-opacity', (d, i) => getDotColor(i))
                 .attr('d', d => symbol())
             }
+            dataJoin(moviesPercentPassed);
               
             const brush = d3.brushX()  // Add the brush feature using the d3.brush function
               // .extent([[0, 0], [width, height]]) // wrong
