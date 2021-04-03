@@ -56,13 +56,13 @@
         const g = svg.append('g')
           .classed('marks', true)
 
-          // helper that tackles selection and cluster color in the absence of a selection
-          function getClusterColor(datum) {
-            if (datum.hasOwnProperty("selected") && !datum.selected) {
-              return "lightgray";
-            }
-            return colorScale(datum.cluster);
-          };
+        // helper that tackles selection and cluster color in the absence of a selection
+        function getClusterColor(datum) {
+          if (datum.hasOwnProperty("selected") && !datum.selected) {
+            return "lightgray";
+          }
+          return colorScale(datum.cluster);
+        };
 
         //*********************************************************************
         // Draw our histogram
@@ -154,17 +154,17 @@
 
         //scatter plot datajoin
         function dataJoin(rawData = gapminder) {
-            const data = rawData.filter(d => d.year === year);
+          const data = rawData.filter(d => d.year === year);
 
-            g.selectAll('path')
-                .data(data)
-                .join('path')
-                  .classed('country', true) // can reference these marks like css, i.e. 'path.country'
-                  .attr('transform', d => `translate(${xScale(d.fertility)}, ${yScale(d.life_expect)})`)
-                  .attr('fill', d => getClusterColor(d))
-                  .attr('fill-opacity', 0.7)
-                  .attr('d', d => symbol())
-          }
+          g.selectAll('path')
+            .data(data)
+            .join('path')
+              .classed('country', true) // can reference these marks like css, i.e. 'path.country'
+              .attr('transform', d => `translate(${xScale(d.fertility)}, ${yScale(d.life_expect)})`)
+              .attr('fill', d => getClusterColor(d))
+              .attr('fill-opacity', 0.7)
+              .attr('d', d => symbol())
+        }
 
 
         // Helper to draw both the scatter plot and the histogram
