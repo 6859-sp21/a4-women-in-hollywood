@@ -125,9 +125,10 @@
             function getDotColor(index) {
               year = indexToYear(index)
               // if (datum.hasOwnProperty("selected") && !datum.selected) {
-              //   return "lightgray";
-              // }
-              if (year >= yearRange[0] && year <= yearRange[1]) {
+                //   return "lightgray";
+                // }
+              if (Math.ceil(year) >= yearRange[0] && Math.ceil(year) <= yearRange[1]) {
+                // console.log("Index", year)
                 return 0.7
               }
               return 0;
@@ -152,7 +153,7 @@
             }
               
             const brush = d3.brushX()  // Add the brush feature using the d3.brush function
-              .extent([[0, 0], [width, height]]) // wrong
+              // .extent([[0, 0], [width, height]]) // wrong
               .extent([[margin.left, 0], [width, height - margin.bottom]])
               .on("start brush end", brushed)
             
@@ -165,7 +166,7 @@
               const coords = event.selection;
               if (coords) {
                 const [x0, x1] = coords;
-                console.log(x0, x1)
+                console.log("Coords", x0, x1)
                 
                 // augment the data with a field "selected" which is set to true only
                 // for points within the brush selection
@@ -176,7 +177,7 @@
                     // });
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
                 const brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-                console.log(yearRange)
+                console.log("Years", yearRange)
                 
                 chartsDataJoin(brushedData);
               }
@@ -419,7 +420,7 @@
 
 
                 function ticked() {
-                    console.log("tick")
+                    // console.log("tick")
                     //console.log(data.map(function(d){ return d.x; }));
                     circles
                         .attr("cx", function(d){ return d.x; })
