@@ -208,9 +208,7 @@
 
                 var circles = bubble_chart_svg.selectAll("circle")
                     .data(movies, function(d){ return d.imdb ;});
-                
-                console.log("circles", circles);
-                
+
                 var circlesEnter = circles.enter().append("circle")
                     .attr("class", function(d) { return "bubbles " + d.binary })
                     .attr("r", function(d, i){ return d.r; })
@@ -228,7 +226,19 @@
                     .on("mouseover", showTooltip )
                     .on("mousemove", moveTooltip )
                     .on("mouseleave", hideTooltip )
-                
+
+                circlesEnter.append("text")
+                    .attr("dy", ".2em")
+                    .style("text-anchor", "middle")
+                    .text(d => {
+                        var txt = document.createElement("textarea");
+                        txt.innerHTML = d.title;
+                        return txt.value;
+                    })
+                    .attr('color', 'white')
+                    .attr('font-size', 10)
+                    .attr('text-anchor', 'middle')
+
                 circles = circles.merge(circlesEnter)
 
                 let texts = bubble_chart_svg.selectAll(null)
@@ -241,6 +251,7 @@
                         return txt.value;
                     })
                     .attr('color', 'white')
+                    .attr('class', function(d) { return "bubbles " + d.binary })
                     .attr('font-size', 10)
                     .attr('text-anchor', 'middle')
                 
@@ -264,7 +275,7 @@
                         .style("left", (()=> {
                             console.log(d3.pointer(event), event);
                             // console.log((d3.pointer(event)[0]+30) + "px");
-                            return (event.pageX) + "px"
+                            return (event.pageX + "px")
                         }))
                         .style("top", (event.pageY-30) + "px")
                 }
@@ -341,8 +352,7 @@
                     .attr("r", 7)
                     .style("fill", function(d){
                         return d=="PASS"? "#71c788" : "#b85b56";})
-                    .on("click", highlight)
-                    // .on('mouseover', console.log("AHA"))
+                    .on('mouseover', highlight)
                     .on("mouseleave", noHighlight)
 
                 // Add labels beside legend dots
@@ -359,7 +369,6 @@
                     .on("mouseover", highlight)
                     .on("mouseleave", noHighlight)
 
-                // highlight but like also for some reason none of this works
                 // What to do when one group is hovered
                 function highlight (d){
                     console.log("highlight?" , d)
