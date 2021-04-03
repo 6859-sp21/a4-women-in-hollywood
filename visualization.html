@@ -43,63 +43,91 @@
 
         // append the svg object to the body of the page
         var line_chart_svg = d3.select("#line_chart")
-        .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
+          .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+              .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
 
         //Read the data
         d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
-            .then(function (movies) {            
-                console.log("movies", movies[0]);
-                years = [];
-                moviesPerYear = [];
-                moviesPassedPerYear =[];
-                moviesPercentPassed = [];
-                for (year=1973; year<=2013; year++) {
-                    moviesInYear = movies.filter(mov => mov.year === year);
-                    numMovies = moviesInYear.length;
-                    moviesPassedInYear = movies.filter(mov => mov.year === year && mov.binary==="PASS");
-                    numMoviesPassed = moviesPassedInYear.length;
-                    
-                    moviesPerYear.push(numMovies);
-                    moviesPassedPerYear.push(numMoviesPassed);
-                    moviesPercentPassed.push(numMoviesPassed/numMovies);
-                    movies.push(year);
-                }
+          .then(function (movies) {            
+            console.log("movies", movies[0]);
+            years = [];
+            moviesPerYear = [];
+            moviesPassedPerYear =[];
+            moviesPercentPassed = [];
+            for (year=1973; year<=2013; year++) {
+                moviesInYear = movies.filter(mov => mov.year === year);
+                numMovies = moviesInYear.length;
+                moviesPassedInYear = movies.filter(mov => mov.year === year && mov.binary==="PASS");
+                numMoviesPassed = moviesPassedInYear.length;
+                
+                moviesPerYear.push(numMovies);
+                moviesPassedPerYear.push(numMoviesPassed);
+                moviesPercentPassed.push(numMoviesPassed/numMovies);
+                movies.push(year);
+            }
 
-                // Add X axis --> the years
-                var x = d3.scaleLinear()
-                  .domain([1973, 2013])
-                  .range([ 0, width ]);
-                line_chart_svg.append("g")
-                  .attr("transform", "translate(0," + height + ")")
-                  .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+            // Add X axis --> the years
+            var x = d3.scaleLinear()
+              .domain([1973, 2013])
+              .range([ 0, width ]);
+            line_chart_svg.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-                var indexToYear = d3.scaleLinear()
-                  .domain([0, 41])
-                  .range([1973, 2013])
+            var indexToYear = d3.scaleLinear()
+              .domain([0, 41])
+              .range([1973, 2013])
 
-                // Add Y axis
-                var y = d3.scaleLinear()
-                  .domain([0, 1])
-                  .range([ height, 0 ]);
-                line_chart_svg.append("g")
-                  .call(d3.axisLeft(y).tickFormat(function (d) { return d*100 + "%" }));
+            // Add Y axis
+            var y = d3.scaleLinear()
+              .domain([0, 1])
+              .range([ height, 0 ]);
+            line_chart_svg.append("g")
+              .call(d3.axisLeft(y).tickFormat(function (d) { return d*100 + "%" }));
 
-                // Add the line
-                line_chart_svg.append("path")
-                  .datum(moviesPercentPassed)
-                  .attr("fill", "none")
-                  .attr("stroke", "steelblue")
-                  .attr("stroke-width", 1.5)
-                  .attr("d", d3.line()
-                    .x(function(d, i ) { return x(indexToYear(i)) })
-                    .y(function(d) { return y(d) })
-                  )
-            });
+            // Add the line
+            line_chart_svg.append("path")
+              .datum(moviesPercentPassed)
+              .attr("fill", "none")
+              .attr("stroke", "steelblue")
+              .attr("stroke-width", 1.5)
+              .attr("d", d3.line()
+                .x(function(d, i ) { return x(indexToYear(i)) })
+                .y(function(d) { return y(d) })
+              )
+            
+            const brush = d3.brush()  // Add the brush feature using the d3.brush function
+              .extent([[0, 0], [width, height]]) // wrong
+              .extent([[margin.left, 0], [width, height - margin.bottom]])
+              .on("start brush end", brushed)
+            
+            // svg.select("g.marks")
+            //   .attr("class", "brush")
+            //   .call(brush)
+
+            // 11. add brush callback to handle brush event
+            function brushed(event) {
+              const coords = event.selection; // [[x0, y0], [x1, y1]] for 2D brushes; [x0, x1] or [y0, y1] for 1D brushes
+              if (coords) {
+                const [[x0, y0], [x1, y1]] = coords;
+
+                // augment the data with a field "selected" which is set to true only
+                // for points within the brush selection
+                const brushedData = gapminder.map(d => {
+                  return {
+                    ...d,
+                    selected: x0 <= xScale(d.fertility) && xScale(d.fertility) < x1 && y0 <= yScale(d.life_expect) && yScale(d.life_expect) < y1
+                  };
+                });
+
+                chartsDataJoin(brushedData);
+              }
+            };
+          });
     </script>
     <script>
         // for the bubble chart
