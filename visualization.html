@@ -244,8 +244,8 @@
                     .attr('font-size', 10)
                     .attr('text-anchor', 'middle')
                 
-                //tooltips
-                var tooltip = d3.select("#bubble_chart")
+                //tooltips but like for some reason none of this works
+                var tooltip = d3.select("body")
                     .append("div")
                     .style("opacity", 0)
                     .attr("class", "tooltip")
@@ -254,23 +254,27 @@
                     .style("padding", "10px")
                     .style("color", "white")       
                 
-                var showTooltip = function(d) {
+                function showTooltip (d) {
                     tooltip
                         .transition()
                         .duration(200)
                     tooltip
                         .style("opacity", 1)
                         .html(d.title)
-                        .style("left", (d3.mouse(this)[0]+30) + "px")
-                        .style("top", (d3.mouse(this)[1]+30) + "px")
+                        .style("left", (()=> {
+                            console.log(d3.pointer(event), event);
+                            // console.log((d3.pointer(event)[0]+30) + "px");
+                            return (event.pageX) + "px"
+                        }))
+                        .style("top", (event.pageY-30) + "px")
                 }
 
-                var moveTooltip = function(d) {
+                function moveTooltip (d) {
                     tooltip
-                    .style("left", (d3.mouse(this)[0]+30) + "px")
-                    .style("top", (d3.mouse(this)[1]+30) + "px")
+                    .style("left", (event.pageX) + "px")
+                    .style("top", (event.pageY-30) + "px")
                 }
-                var hideTooltip = function(d) {
+                function hideTooltip (d) {
                     tooltip
                     .transition()
                     .duration(200)
@@ -355,18 +359,18 @@
                     .on("mouseover", highlight)
                     .on("mouseleave", noHighlight)
 
-                // highlight
+                // highlight but like also for some reason none of this works
                 // What to do when one group is hovered
-                var highlight = function(d){
-                    console.log("highlight?")
+                function highlight (d){
+                    console.log("highlight?" , d)
                     // reduce opacity of all groups
                     d3.selectAll(".bubbles").style("opacity", .05)
                     // except the one that is hovered
-                    d3.selectAll("."+d).style("opacity", 1)
+                    d3.selectAll("."+d.target.innerHTML).style("opacity", 1)
                 }
 
                 // And when it is not hovered anymore
-                var noHighlight = function(d){
+                function noHighlight (d){
                     d3.selectAll(".bubbles").style("opacity", 1)
                 }
 
@@ -393,7 +397,6 @@
                 function clicked(event, d) {
                     d3.select(this).transition()
                         .attr("r", d.r * 2)
-                        .style("stroke", "black")
                     .transition()
                         .attr("r", d.r);
                 }
