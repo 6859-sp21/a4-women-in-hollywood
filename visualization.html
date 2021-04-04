@@ -237,13 +237,16 @@
 
             // BUBBLE CHART BASED ON BRUSHED DATA
             //bubble chart datajoin
-            function dataJoinBubble(brushedData = movies) {
+            function dataJoinBubble(brushedData = []) {
               console.log(brushedData)
                 bubble_chart_svg.selectAll('*').remove(); 
                 brushedData.forEach(function(movie){
                     movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
                     movie.x = w / 2;
                     movie.y = h / 2;
+                    var txt = document.createElement("textarea");
+                    txt.innerHTML = movie.title;
+                    movie.title = txt.value;
                 })
                 // console.log(brushedData)
                 // bind nodes data to circle elements
