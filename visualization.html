@@ -58,8 +58,8 @@
 
 
         // for the bubble chart
-        var bubble_chart_width = 520,
-            bubble_chart_height = 420,
+        var bubble_chart_width = 720,
+            bubble_chart_height = 650,
             padding = 0.5, // separation between same-color nodes
             clusterPadding = 1; // separation between different-color nodes
            
@@ -238,7 +238,7 @@
             // BUBBLE CHART BASED ON BRUSHED DATA
             //bubble chart datajoin
             function dataJoinBubble(brushedData = []) {
-              console.log(brushedData)
+            //   console.log(brushedData)
                 bubble_chart_svg.selectAll('*').remove(); 
                 brushedData.forEach(function(movie){
                     movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
