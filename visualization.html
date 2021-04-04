@@ -50,6 +50,8 @@
     <script>
         // Load data from a URL. You can also have the json file downloaded.
         // See https://github.com/d3/d3/blob/master/API.md#fetches-d3-fetch for more options.
+        const earliestYear = 1973
+        const latestYear = 2013
 
         // set the dimensions and margins of the graph
         var margin = {top: 10, right: 10, bottom: 40, left: 40},
@@ -99,11 +101,11 @@
           .then(function (movies) {            
             // console.log("movies", movies[0]);
             years = [];
-            yearRange = [1973, 2013]
+            yearRange = [earliestYear, latestYear]
             moviesPerYear = [];
             moviesPassedPerYear =[];
             moviesPercentPassed = [];
-            for (year=1973; year<=2013; year++) {
+            for (year=earliestYear; year<=latestYear; year++) {
                 moviesInYear = movies.filter(mov => mov.year === year);
                 numMovies = moviesInYear.length;
                 moviesPassedInYear = movies.filter(mov => mov.year === year && mov.binary==="PASS");
@@ -114,35 +116,37 @@
                 moviesPercentPassed.push(numMoviesPassed/numMovies);
                 movies.push(year);
             }
-
+            yearsNum = moviesPerYear.length-1
+            // console.log("yearsNum", yearsNum, earliestYear, latestYear, latestYear-earliestYear)
+            
             const svg = d3.create('svg')
               .attr('width', width)
               .attr('height', height);
             const g = svg.append('g')
               .classed('marks', true)
-              // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+            // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            
             // Add X axis --> the years
             var x = d3.scaleLinear()
-              .domain([1973, 2013])
+              .domain([earliestYear, latestYear])
               .range([ margin.left, width-margin.right ]);
             svg.append("g")
               .classed('x-axis', true)
               .attr("transform", "translate(0," + (height - margin.bottom) + ")")
               .call(d3.axisBottom(x).tickFormat(d3.format("d")));
-
+              
             var indexToYear = d3.scaleLinear()
-              .domain([0, 41])
-              .range([1973, 2013])
-
+              .domain([0, yearsNum])
+              .range([earliestYear, latestYear])
+            
             var brushToYear = d3.scaleLinear()
-              .domain([40, 870])
-              .range([1973, 2013])
-
+              .domain([margin.left, width-margin.right])
+              .range([earliestYear, latestYear])
+            
             var yearToIndex = d3.scaleLinear()
-              .domain([1973, 2013])
-              .range([0, 41])
-
+              .domain([earliestYear, latestYear])
+              .range([0, yearsNum])
+              
             // Add Y axis
             var y = d3.scaleLinear()
               .domain([0, 1])
@@ -169,7 +173,7 @@
               // if (datum.hasOwnProperty("selected") && !datum.selected) {
                 //   return "lightgray";
                 // }
-              if (Math.ceil(year) >= yearRange[0] && Math.ceil(year) <= yearRange[1]) {
+              if (Math.floor(year) >= yearRange[0] && Math.floor(year) <= yearRange[1]) {
                 // console.log("Index", year)
                 return 0.7
               }
@@ -224,10 +228,10 @@
                     //   };
                     // });
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
+                brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
               } else {
-                yearRange = [1973, 2013]
+                yearRange = [earliestYear, latestYear]
               }
-              brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
               // console.log("Years", yearRange)
 
               chartsDataJoin(brushedData);
@@ -278,10 +282,10 @@
                       tooltip.transition()
                         .duration(200)
                         .style("opacity", 0.8)
-                      tooltip.html("Title: " + d.title + 
-                                   "<br>Year: " + d.year + 
-                                   "<br>Budget: " + d.budget +
-                                   "<br>Grossed: " + d.domgross)
+                      tooltip.html("<b>" + d.title + 
+                                   "</b><br>(<i>" + d.year + 
+                                   "</i>)<br><b>Budget</b>: $" + d.budget +
+                                   "<br><b>Grossed</b>: $" + d.domgross)
                         .style("left", (event.pageX) + "px")
                         .style("top", (event.pageY) + "px")
                         // .style("z", 1)
