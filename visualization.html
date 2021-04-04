@@ -173,6 +173,8 @@
 
             function chartsDataJoin(rawData = gapminder) {
               dataJoin(rawData);
+              console.log(rawData, "brushed data");
+              dataJoinBubble(rawData);
             };
 
             const symbol = d3.symbol();
@@ -229,14 +231,71 @@
             document.getElementById("line_chart").appendChild(svg.node());
 
             // BUBBLE CHART BASED ON BRUSHED DATA
-            
-            brushedData.forEach(function(movie){
-                movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
-                movie.x = w / 2;
-                movie.y = h / 2;
-            })
-            console.log(brushedData)
+            //bubble chart datajoin
+            function dataJoinBubble(brushedData = movies) {
+                bubble_chart_svg.selectAll('*').remove(); 
+                brushedData.forEach(function(movie){
+                    movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
+                    movie.x = w / 2;
+                    movie.y = h / 2;
+                })
+                console.log(brushedData)
+                var circles = bubble_chart_svg.selectAll("circle")
+                    .data(brushedData, function(d){ return d.imdb ;});
 
+                var circlesEnter = circles.enter().append("circle")
+                    .attr("class", function(d) { return "bubbles " + d.binary })
+                    .attr("r", function(d, i){ return d.r; })
+                    .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
+                            .attr("cy", function(d, i){ return 250; })
+                    .style("fill", function(d, i){ return setColor(d) })
+                    .style("stroke", function(d, i){ return setColor(d) })
+                    .style("stroke-width", 1)
+                    .style("pointer-events", "all")
+                    .call(d3.drag()
+                            .on("start", dragstarted)
+                            .on("drag", dragged)
+                            .on("end", dragended))
+                    .on("click", clicked)
+                    .on("mouseover", showTooltip )
+                    .on("mousemove", moveTooltip )
+                    .on("mouseleave", hideTooltip )
+
+                circles = circles.merge(circlesEnter)
+
+                let texts = bubble_chart_svg.selectAll(null)
+                    .data(brushedData)
+                    .enter()
+                    .append('text')
+                    .text(d => {
+                        var txt = document.createElement("textarea");
+                        txt.innerHTML = d.title;
+                        return txt.value;
+                    })
+                    .attr('color', 'white')
+                    .attr('class', function(d) { return "bubbles " + d.binary })
+                    .attr('font-size', 10)
+                    .attr('text-anchor', 'middle')
+                
+                function ticked() {
+                    // console.log("tick")
+                    //console.log(data.map(function(d){ return d.x; }));
+                    circles
+                        .attr("cx", function(d){ return d.x; })
+                        .attr("cy", function(d){ return d.y; });
+                    texts.attr('x', (data) => {
+                        return data.x
+                        })
+                        .attr('y', (data) => {
+                            return data.y
+                        });
+                }   
+
+                simulation
+                        .nodes(brushedData)
+                        .on("tick", ticked);
+            }
+            
             function setScale(value) {
                 return Math.sqrt(value*0.00001 / Math.PI)
             }
@@ -246,55 +305,6 @@
                 return d.binary =="PASS"? "#71c788" : "#b85b56";
             };
 
-            var circles = bubble_chart_svg.selectAll("circle")
-                .data(brushedData, function(d){ return d.imdb ;});
-
-            var circlesEnter = circles.enter().append("circle")
-                .attr("class", function(d) { return "bubbles " + d.binary })
-                .attr("r", function(d, i){ return d.r; })
-                .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
-                        .attr("cy", function(d, i){ return 250; })
-                .style("fill", function(d, i){ return setColor(d) })
-                .style("stroke", function(d, i){ return setColor(d) })
-                .style("stroke-width", 1)
-                .style("pointer-events", "all")
-                .call(d3.drag()
-                        .on("start", dragstarted)
-                        .on("drag", dragged)
-                        .on("end", dragended))
-                .on("click", clicked)
-                .on("mouseover", showTooltip )
-                .on("mousemove", moveTooltip )
-                .on("mouseleave", hideTooltip )
-
-            circlesEnter.append("text")
-                .attr("dy", ".2em")
-                .style("text-anchor", "middle")
-                .text(d => {
-                    var txt = document.createElement("textarea");
-                    txt.innerHTML = d.title;
-                    return txt.value;
-                })
-                .attr('color', 'white')
-                .attr('font-size', 10)
-                .attr('text-anchor', 'middle')
-
-            circles = circles.merge(circlesEnter)
-
-            let texts = bubble_chart_svg.selectAll(null)
-                .data(brushedData)
-                .enter()
-                .append('text')
-                .text(d => {
-                    var txt = document.createElement("textarea");
-                    txt.innerHTML = d.title;
-                    return txt.value;
-                })
-                .attr('color', 'white')
-                .attr('class', function(d) { return "bubbles " + d.binary })
-                .attr('font-size', 10)
-                .attr('text-anchor', 'middle')
-            
             //tooltips but like for some reason none of this works
             var tooltip = d3.select("body")
                 .append("div")
@@ -421,27 +431,7 @@
             // And when it is not hovered anymore
             function noHighlight (d){
                 d3.selectAll(".bubbles").style("opacity", 1)
-            }
-
-
-            function ticked() {
-                // console.log("tick")
-                //console.log(data.map(function(d){ return d.x; }));
-                circles
-                    .attr("cx", function(d){ return d.x; })
-                    .attr("cy", function(d){ return d.y; });
-                texts.attr('x', (data) => {
-                    return data.x
-                    })
-                    .attr('y', (data) => {
-                        return data.y
-                    });
-            }   
-
-            simulation
-                    .nodes(brushedData)
-                    .on("tick", ticked);
-            
+            }            
 
             function clicked(event, d) {
                 d3.select(this).transition()
