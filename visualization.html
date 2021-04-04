@@ -228,7 +228,7 @@
                 yearRange = [1973, 2013]
               }
               brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-              console.log("Years", yearRange)
+            //   console.log("Years", yearRange)
 
               chartsDataJoin(brushedData);
             };
@@ -244,7 +244,7 @@
                     movie.x = w / 2;
                     movie.y = h / 2;
                 })
-                console.log(brushedData)
+                // console.log(brushedData)
                 // bind nodes data to circle elements
                 const elements = bubble_chart_svg.selectAll('.bubble')
                     .data(brushedData, function(d){ return d.imdb ;})
@@ -278,16 +278,24 @@
                     .attr("class", function(d) { return "bubbles " + d.binary })
                     .style('text-anchor', 'middle')
                     .style('font-size', 10)
-                    .text(d => d.title)
+                    .text(d => {
+                        let width = d.r * 2;
+                        if (width >50 ) {
+                            return d.title
+                        } else {
+                            return ""
+                        }
+                    })
+                    // .each(wrap);
                 
                 function ticked() {
                     bubbles
                         .attr('cx', d => d.x)
                         .attr('cy', d => d.y)
-
                     labels
                         .attr('x', d => d.x)
                         .attr('y', d => d.y)
+                        // .each(updateText)
                 }   
 
                 simulation
@@ -296,6 +304,41 @@
                 simulation.tick(300);
             }
             
+            // function wrap(d) {
+            //     var text = d3.select(this),
+            //     width = d.r * 2,
+            //     x = d.x,
+            //     y = d.y,
+            //     words = text.text().split(/\s+/).reverse(),
+            //     word,
+            //     line = [],
+            //     lineNumber = 0,
+            //     lineHeight = 1;
+
+            //     tspan = text.text(null).append("tspan").attr("x", x).attr("y", y);
+            //     if (width > 50) {
+            //         while (word = words.pop()) {
+            //             line.push(word);
+            //             tspan.text(line.join(" "));
+            //             if (tspan.node().getComputedTextLength() > width) {
+            //                 line.pop();
+            //                 tspan.text(line.join(" "));
+            //                 line = [word];
+            //                 tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + "em").text(word);
+            //             }
+            //         }
+            //     } 
+            // }
+
+            // function updateText(d) {
+            //     tspans = d3.select(this).selectAll('text > tspans');
+                
+            //     tspans.attr('x', d => d.x)
+            //             .attr('y', d => d.y)
+                    
+                
+            // }
+
             function setScale(value) {
                 return Math.sqrt(value*0.00001 / Math.PI)
             }
@@ -323,7 +366,7 @@
                     .style("opacity", 1)
                     .html(d.title)
                     .style("left", (()=> {
-                        console.log(d3.pointer(event), event);
+                        // console.log(d3.pointer(event), event);
                         // console.log((d3.pointer(event)[0]+30) + "px");
                         return (event.pageX + "px")
                     }))
@@ -441,7 +484,7 @@
             }
 
             function dragstarted(mouse,node) {
-                console.log("dragstarted ", "movie", node, "d", mouse)
+                // console.log("dragstarted ", "movie", node, "d", mouse)
                 if (!mouse.active) simulation.alpha(1).restart();
                 node.fx = mouse.x;
                 node.fy = mouse.y;
