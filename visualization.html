@@ -21,7 +21,7 @@
     <p>Year: 1990 (change this later on)</p>
 
     <div class="two-col">
-        <div id="bubble_chart" style="width:520px;height:420px;">
+        <div id="bubble_chart">
             <!-- This is where we will put our chart. -->
         </div>
         <div id="bubble_legend" style="width:320px;height:420px;">
@@ -166,7 +166,9 @@
             function brushed(event) {
               const coords = event.selection;
               if (coords) {
-                const [x0, x1] = coords;
+                // const [x0, x1] = coords;
+                x0 = coords[0]
+                x1 = coords[1]
                 console.log("Coords", x0, x1)
                 
                 // augment the data with a field "selected" which is set to true only
@@ -177,11 +179,13 @@
                     //   };
                     // });
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
-                const brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-                console.log("Years", yearRange)
-                
-                chartsDataJoin(brushedData);
+              } else {
+                yearRange = [1973, 2013]
               }
+              const brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
+              console.log("Years", yearRange)
+
+              chartsDataJoin(brushedData);
             };
               
             document.getElementById("line_chart").appendChild(svg.node());
@@ -189,8 +193,8 @@
     </script>
     <script>
         // for the bubble chart
-        var bubble_chart_width = 520,
-            bubble_chart_height = 420,
+        var bubble_chart_width = 900,
+            bubble_chart_height = 500,
             padding = 1.5, // separation between same-color nodes
             clusterPadding = 6; // separation between different-color nodes
            
