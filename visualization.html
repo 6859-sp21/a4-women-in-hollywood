@@ -547,69 +547,7 @@
                 simulation.alpha(1).restart();
             }
           });
-    </script>
-    <script>
-        
-
-        d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
-            .then(function(movies) {
-                movies = movies.filter(mov => mov.year === 1990);
-
-                
-                
-                // function splitBubbles(byVar) {
-                    
-                //     centerScale.domain(movies.map(function(d){ return d[byVar]; }));
-                    
-                //     if(byVar == "all"){
-                //     hideTitles()
-                //     } else {
-                //         showTitles(byVar, centerScale);
-                //     }
-                    
-                //     // @v4 Reset the 'x' force to draw the bubbles to their year centers
-                //     simulation.force('x', d3.forceX().strength(forceStrength).x(function(d){ 
-                //         return centerScale(d[byVar]);
-                //     }));
-
-                //     // @v4 We can reset the alpha value and restart the simulation
-                //     simulation.alpha(2).restart();
-                // }
-                
-                // function hideTitles() {
-                //     bubble_chart_svg.selectAll('.title').remove();
-                // }
-
-                // function showTitles(byVar, scale) {
-                //     // Another way to do this would be to create
-                //     // the year texts once and then just hide them.
-                //     var titles = bubble_chart_svg.selectAll('.title')
-                //     .data(scale.domain());
-                    
-                //     titles.enter().append('text')
-                //         .attr('class', 'title')
-                //         .merge(titles)
-                //         .attr('x', function (d) { return scale(d); })
-                //         .attr('y', 40)
-                //         .attr('text-anchor', 'middle')
-                //         .text(function (d) { return byVar + ' ' + d; });
-                    
-                //     titles.exit().remove() 
-                // }
-            }
-        ).catch(e => {
-            console.log(e);
-        });
-
-        Array.prototype.contains = function(v) {
-            for(var i = 0; i < this.length; i++) {
-                if(this[i] === v) return true;
-            }
-            return false;
-        };
-
-      </script>
-      
+    </script>      
   </body>
 
   <!-- This adapted from Arvind's observable from lecture. https://observablehq.com/d/4c93c3a516d35624 -->
