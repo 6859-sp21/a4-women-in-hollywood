@@ -2,23 +2,27 @@
   <head>
     <!-- Load d3.js -->
     <script src="https://d3js.org/d3.v6.js"></script>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <h1>Women In Hollywood</h1>
-    <h2>What is the Bechdel Test?</h2>
-    <p>blah </p>
+    <h1>The Exclusion of Women In Hollywood</h1>
 
-    <h2>What was your favorite childhood movie?</h2>
+    <h2>What is the Bechdel Test?</h2>
+    <p>The Bechdel Test, or Bechdel-Wallace Test, sometimes called the Bechdel Rule is a simple test which names the following three criteria: (1) it has to have at least two women in it, who (2) who talk to each other, about (3) something besides a man.</p>
+
+    <h2>Did your favorite childhood movie pass the test?</h2>
+    <p>Search for it to find out.</p>
     <input></input> 
 
 
-    <h2>Line Chart</h2>
+    <h2>Percentage of Movies Passing the Bechdel Test</h2>
+    <p>From 1973 to 2013.</p>
     <div id="line_chart">
       <!-- This is where we will put our chart. -->
     </div>
 
-    <h2>Bubble Chart</h2>
-    <p>Year: 1990 (change this later on)</p>
+    <h2>A Closer Look</h2>
+    <p>Movie Years: </p>
 
     <div class="two-col">
         <div id="bubble_chart">
@@ -56,8 +60,8 @@
         // for the bubble chart
         var bubble_chart_width = 520,
             bubble_chart_height = 420,
-            padding = 1.5, // separation between same-color nodes
-            clusterPadding = 6; // separation between different-color nodes
+            padding = 0.5, // separation between same-color nodes
+            clusterPadding = 1; // separation between different-color nodes
            
         var w = bubble_chart_width, h = bubble_chart_height;
     
@@ -75,11 +79,12 @@
 
         var simulation = d3.forceSimulation()
                 .force("collide",d3.forceCollide( function(d){
-                    return d.r + 8 }).iterations(16) 
+                    return d.r + 2 }).iterations(20) 
                 )
                 .force("charge", d3.forceManyBody())
                 .force("y", d3.forceY().y(h / 2))
                 .force("x", d3.forceX().x(w / 2))
+                .stop();
             
         bubble_chart_svg.append("text")
             .attr("x", (width / 2))             
@@ -248,8 +253,8 @@
                     .attr("r", function(d, i){ return d.r; })
                     .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
                             .attr("cy", function(d, i){ return 250; })
-                    .style("fill", function(d, i){ return setColor(d) })
-                    .style("stroke", function(d, i){ return setColor(d) })
+                    .style("fill", function(d, i){ return setColor(d.binary) })
+                    .style("stroke", function(d, i){ return setColor(d.binary) })
                     .style("stroke-width", 1)
                     .style("pointer-events", "all")
                     .call(d3.drag()
@@ -273,13 +278,12 @@
                         return txt.value;
                     })
                     .attr('color', 'white')
-                    .attr('class', function(d) { return "bubbles " + d.binary })
+                    .attr('class', function(d) { return "bubbleText bubbles " + d.binary })
                     .attr('font-size', 10)
                     .attr('text-anchor', 'middle')
                 
                 function ticked() {
-                    // console.log("tick")
-                    //console.log(data.map(function(d){ return d.x; }));
+                    // console.log("tick");
                     circles
                         .attr("cx", function(d){ return d.x; })
                         .attr("cy", function(d){ return d.y; });
@@ -294,6 +298,7 @@
                 simulation
                         .nodes(brushedData)
                         .on("tick", ticked);
+                simulation.tick(300);
             }
             
             function setScale(value) {
@@ -301,8 +306,8 @@
             }
 
             // Add a scale for bubble color
-            function setColor(d) {
-                return d.binary =="PASS"? "#71c788" : "#b85b56";
+            function setColor(test_result) {
+                return test_result =="PASS"? "#71c788" : "#db8181";
             };
 
             //tooltips but like for some reason none of this works
@@ -401,7 +406,7 @@
                 .attr("cy", function(d,i){ return 100 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("r", 7)
                 .style("fill", function(d){
-                    return d=="PASS"? "#71c788" : "#b85b56";})
+                    return setColor(d);})
                 .on('mouseover', highlight)
                 .on("mouseleave", noHighlight)
 
@@ -412,7 +417,7 @@
                 .append("text")
                 .attr("x", 100 + size*.8)
                 .attr("y", function(d,i){ return 90 + i * (size + 5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
-                .style("fill", function(d){ return d=="PASS"? "#71c788" : "#b85b56"})
+                .style("fill", function(d){ return setColor(d)})
                 .text(function(d){ return d})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")

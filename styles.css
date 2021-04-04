@@ -1,0 +1,11 @@
+body {
+    background-color: aliceblue;
+    text-align: center;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    padding: 50 10;
+}
+
+.bubbleText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
