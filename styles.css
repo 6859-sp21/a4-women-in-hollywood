@@ -9,3 +9,15 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.tooltip { 
+    position: absolute;
+    text-align: center;
+    width: auto;
+    height: auto;
+    color: black;
+    background-color: lightgray;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 5px;
+}

@@ -97,7 +97,7 @@
         //Read the data
         d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
           .then(function (movies) {            
-            console.log("movies", movies[0]);
+            // console.log("movies", movies[0]);
             years = [];
             yearRange = [1973, 2013]
             moviesPerYear = [];
@@ -178,7 +178,7 @@
 
             function chartsDataJoin(rawData = gapminder) {
               dataJoin(rawData);
-              console.log(rawData, "brushed data");
+              // console.log(rawData, "brushed data");
               dataJoinBubble(rawData);
             };
 
@@ -214,7 +214,7 @@
                 // const [x0, x1] = coords;
                 x0 = coords[0]
                 x1 = coords[1]
-                console.log("Coords", x0, x1)
+                // console.log("Coords", x0, x1)
                 
                 // augment the data with a field "selected" which is set to true only
                 // for points within the brush selection
@@ -228,7 +228,7 @@
                 yearRange = [1973, 2013]
               }
               brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-            //   console.log("Years", yearRange)
+              // console.log("Years", yearRange)
 
               chartsDataJoin(brushedData);
             };
@@ -238,6 +238,7 @@
             // BUBBLE CHART BASED ON BRUSHED DATA
             //bubble chart datajoin
             function dataJoinBubble(brushedData = movies) {
+              console.log(brushedData)
                 bubble_chart_svg.selectAll('*').remove(); 
                 brushedData.forEach(function(movie){
                     movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
@@ -259,17 +260,43 @@
                     .attr("class", function(d) { return "bubbles " + d.binary })
                     .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
                     .attr("cy", function(d, i){ return 250; })
-                    .style("stroke", function(d, i){ return setColor(d.binary) })
+                    // .style("stroke", function(d, i){ return setColor(d.binary) })
                     .style("stroke-width", 1)
                     .style("pointer-events", "all")
                     .call(d3.drag()
                             .on("start", dragstarted)
                             .on("drag", dragged)
                             .on("end", dragended))
-                    .on("click", clicked)
-                    .on("mouseover", showTooltip )
-                    .on("mousemove", moveTooltip )
-                    .on("mouseleave", hideTooltip )
+                    // .on("click", clicked)
+                    // .on("mouseover", showTooltip )
+                    // .on("mousemove", moveTooltip )
+                    // .on("mouseleave", hideTooltip )
+                    .on("mouseover", function(event, d)  {
+                      tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 0.8)
+                      tooltip.html("Title: " + d.title + 
+                                   "<br>Year: " + d.year + 
+                                   "<br>Budget: " + d.budget +
+                                   "<br>Grossed: " + d.domgross)
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY) + "px")
+                        // .style("z", 1)
+
+                      d3.select(this)
+                        .style("stroke", "black")
+                    })
+                    .on("mouseout", function(event, d){
+                      tooltip.transition()
+                        .duration(100)
+                        .style("opacity", 0)
+                        .style("top", "-1000px")
+                        .style("left", "-1000px")
+                        // .style("z", -100)
+
+                      d3.select(this)
+                        .style("stroke", setColor(d.binary))
+                    })
 
                 // labels
                 let labels = elements
@@ -277,7 +304,7 @@
                     .attr('dy', '.3em')
                     .attr("class", function(d) { return "bubbles " + d.binary })
                     .style('text-anchor', 'middle')
-                    .style('font-size', 10)
+                    .style('font-size', function(d){ return d.r >= 25 ? 10 : 0})
                     .text(d => {
                         let width = d.r * 2;
                         if (width >50 ) {
@@ -286,7 +313,6 @@
                             return ""
                         }
                     })
-                    // .each(wrap);
                 
                 function ticked() {
                     bubbles
@@ -349,41 +375,45 @@
             };
 
             //tooltips but like for some reason none of this works
-            var tooltip = d3.select("body")
-                .append("div")
-                .style("opacity", 0)
-                .attr("class", "tooltip")
-                .style("background-color", "black")
-                .style("border-radius", "5px")
-                .style("padding", "10px")
-                .style("color", "white")       
+            // var tooltip = d3.select("body")
+            //     .append("div")
+            //     .style("opacity", 0)
+            //     .attr("class", "tooltip")
+            //     .style("background-color", "black")
+            //     .style("border-radius", "5px")
+            //     .style("padding", "10px")
+            //     .style("color", "white")       
             
-            function showTooltip (d) {
-                tooltip
-                    .transition()
-                    .duration(200)
-                tooltip
-                    .style("opacity", 1)
-                    .html(d.title)
-                    .style("left", (()=> {
-                        // console.log(d3.pointer(event), event);
-                        // console.log((d3.pointer(event)[0]+30) + "px");
-                        return (event.pageX + "px")
-                    }))
-                    .style("top", (event.pageY-30) + "px")
-            }
+            // function showTooltip (d) {
+            //     tooltip
+            //         .transition()
+            //         .duration(200)
+            //     tooltip
+            //         .style("opacity", 1)
+            //         .html(d.title)
+            //         .style("left", (()=> {
+            //             // console.log(d3.pointer(event), event);
+            //             // console.log((d3.pointer(event)[0]+30) + "px");
+            //             return (event.pageX + "px")
+            //         }))
+            //         .style("top", (event.pageY-30) + "px")
+            // }
 
-            function moveTooltip (d) {
-                tooltip
-                .style("left", (event.pageX) + "px")
-                .style("top", (event.pageY-30) + "px")
-            }
-            function hideTooltip (d) {
-                tooltip
-                .transition()
-                .duration(200)
-                .style("opacity", 0)
-            }    
+            // function moveTooltip (d) {
+            //     tooltip
+            //     .style("left", (event.pageX) + "px")
+            //     .style("top", (event.pageY-30) + "px")
+            // }
+            // function hideTooltip (d) {
+            //     tooltip
+            //     .transition()
+            //     .duration(200)
+            //     .style("opacity", 0)
+            // }    
+
+            var tooltip = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0)
             
 
             // legend
@@ -464,7 +494,7 @@
 
             // What to do when one group is hovered
             function highlight (d){
-                console.log("highlight?")
+                // console.log("highlight?" , d)
                 // reduce opacity of all groups
                 d3.selectAll(".bubbles").style("opacity", .05)
                 // except the one that is hovered
