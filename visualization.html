@@ -245,15 +245,20 @@
                     movie.y = h / 2;
                 })
                 console.log(brushedData)
-                var circles = bubble_chart_svg.selectAll("circle")
-                    .data(brushedData, function(d){ return d.imdb ;});
+                // bind nodes data to circle elements
+                const elements = bubble_chart_svg.selectAll('.bubble')
+                    .data(brushedData, function(d){ return d.imdb ;})
+                    .enter()
+                    .append('g')
 
-                var circlesEnter = circles.enter().append("circle")
+                let bubbles = elements
+                    .append('circle')
+                    .classed('bubble', true)
+                    .attr('r', d => d.r)
+                    .attr('fill', d => setColor(d.binary))
                     .attr("class", function(d) { return "bubbles " + d.binary })
-                    .attr("r", function(d, i){ return d.r; })
                     .attr("cx", function(d, i){ return 175 + 25 * i + 2 * i ** 2; })
-                            .attr("cy", function(d, i){ return 250; })
-                    .style("fill", function(d, i){ return setColor(d.binary) })
+                    .attr("cy", function(d, i){ return 250; })
                     .style("stroke", function(d, i){ return setColor(d.binary) })
                     .style("stroke-width", 1)
                     .style("pointer-events", "all")
@@ -266,33 +271,23 @@
                     .on("mousemove", moveTooltip )
                     .on("mouseleave", hideTooltip )
 
-                circles = circles.merge(circlesEnter)
-
-                let texts = bubble_chart_svg.selectAll(null)
-                    .data(brushedData)
-                    .enter()
+                // labels
+                let labels = elements
                     .append('text')
-                    .text(d => {
-                        var txt = document.createElement("textarea");
-                        txt.innerHTML = d.title;
-                        return txt.value;
-                    })
-                    .attr('color', 'white')
-                    .attr('class', function(d) { return "bubbleText bubbles " + d.binary })
-                    .attr('font-size', 10)
-                    .attr('text-anchor', 'middle')
+                    .attr('dy', '.3em')
+                    .attr("class", function(d) { return "bubbles " + d.binary })
+                    .style('text-anchor', 'middle')
+                    .style('font-size', 10)
+                    .text(d => d.title)
                 
                 function ticked() {
-                    // console.log("tick");
-                    circles
-                        .attr("cx", function(d){ return d.x; })
-                        .attr("cy", function(d){ return d.y; });
-                    texts.attr('x', (data) => {
-                        return data.x
-                        })
-                        .attr('y', (data) => {
-                            return data.y
-                        });
+                    bubbles
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y)
+
+                    labels
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y)
                 }   
 
                 simulation
@@ -426,7 +421,7 @@
 
             // What to do when one group is hovered
             function highlight (d){
-                console.log("highlight?" , d)
+                console.log("highlight?")
                 // reduce opacity of all groups
                 d3.selectAll(".bubbles").style("opacity", .05)
                 // except the one that is hovered
