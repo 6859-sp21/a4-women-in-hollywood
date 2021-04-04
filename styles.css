@@ -18,4 +18,6 @@ body {
     color: black;
     background-color: lightgray;
     font-size: 12px;
+    padding: 5px;
+    border-radius: 5px;
 }
