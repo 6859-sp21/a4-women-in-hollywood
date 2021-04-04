@@ -22,7 +22,7 @@
     </div>
 
     <h2>A Closer Look</h2>
-    <p>Movie Years: </p>
+    <p>Movie Years: <span id="bubbleYear"></span></p>
 
     <div class="two-col">
         <div id="bubble_chart">
@@ -186,6 +186,29 @@
               dataJoinBubble(rawData);
             };
 
+            function yearLabel(early, end){
+              svg.selectAll(".yearLabel").remove()
+              console.log(early, end)
+              if (earliestYear != early && latestYear != end){
+                if (end != early){
+                  yearText = early + " to " + end
+                } else {
+                  yearText = early
+                }
+                const yearLabel = svg.append('text')
+                  .attr("class", "yearLabel")
+                  .attr('x', 70)
+                  .attr('y', margin.top + 70)
+                  .attr('fill', 'SteelBlue')
+                  .attr('font-family', 'Helvetica Neue, Arial')
+                  .attr('font-weight', 500)
+                  .attr('font-size', 80)
+                  .text(yearText);
+                  
+                document.getElementById("bubbleYear").innerHTML = yearText
+              }
+            }
+
             const symbol = d3.symbol();
             function dataJoin(rawData = movies) {
               // const data = rawData.filter(d => d.year === year);
@@ -215,25 +238,17 @@
             function brushed(event) {
               const coords = event.selection;
               if (coords) {
-                // const [x0, x1] = coords;
                 x0 = coords[0]
                 x1 = coords[1]
-                // console.log("Coords", x0, x1)
-                
-                // augment the data with a field "selected" which is set to true only
-                // for points within the brush selection
-                // const brushedData = movies.map(d => {
-                  //   return {
-                    //     selected: Math.ceil(brushToYear(x0)) <= d.year && d.year <= Math.floor(brushToYear(x1))
-                    //   };
-                    // });
+
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
                 brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
               } else {
                 yearRange = [earliestYear, latestYear]
+                // console.log("Else", yearRange)
               }
-              // console.log("Years", yearRange)
-
+              
+              yearLabel(yearRange[0], yearRange[1])
               chartsDataJoin(brushedData);
             };
               
