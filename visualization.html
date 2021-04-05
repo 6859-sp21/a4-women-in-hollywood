@@ -14,11 +14,11 @@
     <p>Search for it to find out.</p>
     <input></input> 
 
-
+    <div id="search_result"></div>
     <h2>Percentage of Movies Passing the Bechdel Test</h2>
     <p>From 1973 to 2013.</p>
     <div id="line_chart">
-      <!-- This is where we will put our chart. -->
+      <!-- This is where we will put our line chart. -->
     </div>
 
     <h2>A Closer Look</h2>
@@ -26,10 +26,10 @@
 
     <div class="two-col">
         <div id="bubble_chart">
-            <!-- This is where we will put our chart. -->
+            <!-- This is where we will put our bubble chart. -->
         </div>
         <div id="bubble_legend" style="width:320px;height:420px;">
-            <!-- This is where we will put our chart. -->
+            <!-- This is where we will put our bubble legend. -->
             <div class="button_group"></div>
         </div>
     </div>
@@ -166,7 +166,7 @@
               return 0.25;
             };
 
-            function chartsDataJoin(rawData = gapminder) {
+            function chartsDataJoin(rawData = movies) {
               dataJoin(rawData);
               // console.log(rawData, "brushed data");
               dataJoinBubble(rawData);
