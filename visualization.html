@@ -102,21 +102,27 @@
             // console.log("movies", movies[0]);
             years = [];
             yearRange = [earliestYear, latestYear]
-            moviesPerYear = [];
-            moviesPassedPerYear =[];
+            // moviesPerYear = [];
+            // moviesPassedPerYear =[];
             moviesPercentPassed = [];
+            totMovies = 0
+            totPassed = 0
             for (year=earliestYear; year<=latestYear; year++) {
                 moviesInYear = movies.filter(mov => mov.year === year);
                 numMovies = moviesInYear.length;
-                moviesPassedInYear = movies.filter(mov => mov.year === year && mov.binary==="PASS");
+                moviesPassedInYear = moviesInYear.filter(mov => mov.binary==="PASS");
                 numMoviesPassed = moviesPassedInYear.length;
                 
-                moviesPerYear.push(numMovies);
-                moviesPassedPerYear.push(numMoviesPassed);
+                // moviesPerYear.push(numMovies);
+                // moviesPassedPerYear.push(numMoviesPassed);
                 moviesPercentPassed.push(numMoviesPassed/numMovies);
                 movies.push(year);
+                totMovies += numMovies
+                totPassed += numMoviesPassed
             }
-            yearsNum = moviesPerYear.length-1
+            yearsNum = latestYear-earliestYear
+            percentMoviesPassed = totPassed/totMovies
+            // console.log("Movies Passed Start", moviesPassed)
             // console.log("yearsNum", yearsNum, earliestYear, latestYear, latestYear-earliestYear)
             
             const svg = d3.create('svg')
@@ -188,7 +194,7 @@
 
             function yearLabel(early, end){
               svg.selectAll(".yearLabel").remove()
-              console.log(early, end)
+              // console.log(early, end)
               if (earliestYear != early && latestYear != end){
                 if (end != early){
                   yearText = early + " to " + end
@@ -243,12 +249,17 @@
 
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
                 brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
+                // console.log("bd", brushedData)
+                // console.log("bd length:", brushedData.length)
+                percentMoviesPassed = (brushedData.filter(mov => mov.binary === "PASS").length)/(brushedData.length)
+                // console.log("PMP", brushedData.length, brushedData.filter(mov => mov.binary === "PASS"))
               } else {
                 yearRange = [earliestYear, latestYear]
                 // console.log("Else", yearRange)
               }
               
               yearLabel(yearRange[0], yearRange[1])
+              percentPassed(yearRange[0], yearRange[1], percentMoviesPassed)
               chartsDataJoin(brushedData);
             };
               
@@ -499,6 +510,40 @@
                     return setColor(d);})
                 .on('mouseover', highlight)
                 .on("mouseleave", noHighlight)
+            
+            function percentPassed(early, end, passed) {
+              bubble_legend_svg.selectAll(".percentPassed").remove()
+              // console.log("passed", passed)
+              if (earliestYear != early && latestYear != end) {
+                passed = (passed*100).toFixed(2)
+
+                if (end != early) {
+                  yearText = "of movies from " + early + " to " + end + " passed"
+                } else {
+                  yearText = "of movies passed in " + early + " passed"
+                }
+                const percentPassedLabel = bubble_legend_svg.append('text')
+                  .attr("class", "percentPassed")
+                  .attr('x', 70)
+                  .attr('y', margin.top + 30)
+                  .attr('fill', 'gray')
+                  .attr('font-family', 'Helvetica Neue, Arial')
+                  // .attr('font-weight', 500)
+                  .attr('font-size', 30)
+                  .attr('text-align', 'center')
+                  .text(passed+"%");
+                
+                const percentPassedYearLabel = bubble_legend_svg.append('text')
+                  .attr("class", "percentPassed")
+                  // .attr('x', 70)
+                  .attr('y', margin.top + 50)
+                  .attr('fill', 'gray')
+                  .attr('font-family', 'Helvetica Neue, Arial')
+                  // .attr('font-weight', 500)
+                  // .attr('font-size', 80)
+                  .text(yearText);
+              }
+            }
 
             // Add labels beside legend dots
             bubble_legend_svg.selectAll("mylabels")
