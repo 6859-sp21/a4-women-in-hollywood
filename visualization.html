@@ -271,7 +271,7 @@
             //   console.log(brushedData)
                 bubble_chart_svg.selectAll('*').remove(); 
                 brushedData.forEach(function(movie){
-                    movie.r = Math.sqrt(movie.intgross*0.00001 / Math.PI);
+                    movie.r = setScale(movie.intgross);
                     movie.x = w / 2;
                     movie.y = h / 2;
                     var txt = document.createElement("textarea");
@@ -311,7 +311,8 @@
                       tooltip.html("<b>" + d.title + 
                                    "</b><br>(<i>" + d.year + 
                                    "</i>)<br><b>Budget</b>: $" + d.budget +
-                                   "<br><b>Grossed</b>: $" + d.domgross)
+                                   "<br><b>Grossed (domestic)</b>: $" + d.domgross +
+                                   "<br><b>Grossed (international)</b>: $" + d.intgross )
                         .style("left", (event.pageX) + "px")
                         .style("top", (event.pageY) + "px")
                         // .style("z", 1)
@@ -362,41 +363,6 @@
                         .on("tick", ticked);
                 simulation.tick(300);
             }
-            
-            // function wrap(d) {
-            //     var text = d3.select(this),
-            //     width = d.r * 2,
-            //     x = d.x,
-            //     y = d.y,
-            //     words = text.text().split(/\s+/).reverse(),
-            //     word,
-            //     line = [],
-            //     lineNumber = 0,
-            //     lineHeight = 1;
-
-            //     tspan = text.text(null).append("tspan").attr("x", x).attr("y", y);
-            //     if (width > 50) {
-            //         while (word = words.pop()) {
-            //             line.push(word);
-            //             tspan.text(line.join(" "));
-            //             if (tspan.node().getComputedTextLength() > width) {
-            //                 line.pop();
-            //                 tspan.text(line.join(" "));
-            //                 line = [word];
-            //                 tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + "em").text(word);
-            //             }
-            //         }
-            //     } 
-            // }
-
-            // function updateText(d) {
-            //     tspans = d3.select(this).selectAll('text > tspans');
-                
-            //     tspans.attr('x', d => d.x)
-            //             .attr('y', d => d.y)
-                    
-                
-            // }
 
             function setScale(value) {
                 return Math.sqrt(value*0.00001 / Math.PI)
@@ -406,43 +372,6 @@
             function setColor(test_result) {
                 return test_result =="PASS"? "#71c788" : "#db8181";
             };
-
-            //tooltips but like for some reason none of this works
-            // var tooltip = d3.select("body")
-            //     .append("div")
-            //     .style("opacity", 0)
-            //     .attr("class", "tooltip")
-            //     .style("background-color", "black")
-            //     .style("border-radius", "5px")
-            //     .style("padding", "10px")
-            //     .style("color", "white")       
-            
-            // function showTooltip (d) {
-            //     tooltip
-            //         .transition()
-            //         .duration(200)
-            //     tooltip
-            //         .style("opacity", 1)
-            //         .html(d.title)
-            //         .style("left", (()=> {
-            //             // console.log(d3.pointer(event), event);
-            //             // console.log((d3.pointer(event)[0]+30) + "px");
-            //             return (event.pageX + "px")
-            //         }))
-            //         .style("top", (event.pageY-30) + "px")
-            // }
-
-            // function moveTooltip (d) {
-            //     tooltip
-            //     .style("left", (event.pageX) + "px")
-            //     .style("top", (event.pageY-30) + "px")
-            // }
-            // function hideTooltip (d) {
-            //     tooltip
-            //     .transition()
-            //     .duration(200)
-            //     .style("opacity", 0)
-            // }    
 
             var tooltip = d3.select("body").append("div")
               .attr("class", "tooltip")
@@ -520,7 +449,7 @@
                 if (end != early) {
                   yearText = "of movies from " + early + " to " + end + " passed"
                 } else {
-                  yearText = "of movies passed in " + early + " passed"
+                  yearText = "of movies in " + early + " passed"
                 }
                 const percentPassedLabel = bubble_legend_svg.append('text')
                   .attr("class", "percentPassed")
@@ -601,15 +530,7 @@
                 var me = d3.select(this)
                 
             } 
-            
-            function groupBubbles() {
-                hideTitles();
-                // @v4 Reset the 'x' force to draw the bubbles to the center.
-                simulation.force('x', d3.forceX().strength(forceStrength).x(w / 2));
 
-                // @v4 We can reset the alpha value and restart the simulation
-                simulation.alpha(1).restart();
-            }
           });
     </script>      
   </body>
