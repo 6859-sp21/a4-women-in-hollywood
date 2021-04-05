@@ -14,7 +14,32 @@ body {
     opacity: 1 !important;
     stroke: black;
     stroke-width: 1px;
-  }
+}
+
+#bubble_legend {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.button_group {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-around;
+}
+
+.legend_button {
+    padding: 5 10;
+    border-radius: 5px;
+    background-color: darkblue;
+    color: white;
+    border-style: none;
+    border-color: none;
+    opacity: 0.5;
+}
+
+.legend_button:hover {
+    opacity: 1;
+}
 
 .bubbles {
     overflow: hidden;

@@ -363,12 +363,20 @@
             
             function updateLegendAndChart(d) {
               if (d.target.name != radius_var) {
+                let legend_title;
+                if (d.target.name == "intgross") {
+                  legend_title = "International Gross (M)";
+                } else if (d.target.name == "domgross") {
+                  legend_title = "Domestic Gross (M)";
+                } else {
+                  legend_title = "Budget (M)";
+                }
                 radius_var = d.target.name;
                 bubble_legend_svg.selectAll(".circle_legend_title").remove()
                 bubble_legend_svg.append("text")
                   .attr('x', xCircle)
                   .attr("y", height - 100 +30)
-                  .text(radius_var + " (M)")
+                  .text(legend_title)
                   .attr("class", "circle_legend_title")
                   .attr("text-anchor", "middle")
                 dataJoinBubble(brushedData);
@@ -379,23 +387,20 @@
                 
             d3.select(".button_group")
               .append("button")
-                .attr('x', xLabel)
-                .attr('y', margin.top + 300)
                 .attr('name', 'domgross')
+                .attr('class', 'legend_button')
                 .text("Domestic Gross")
                 .on("click", updateLegendAndChart);
             d3.select(".button_group")
               .append("button")
-                .attr('x', xLabel)
-                .attr('y', margin.top + 300)
                 .attr('name', 'intgross')
+                .attr('class', 'legend_button')
                 .text("International Gross")
                 .on("click", updateLegendAndChart);
             d3.select(".button_group")
               .append("button")
-                .attr('x', xLabel)
-                .attr('y', margin.top + 300)
                 .attr('name', 'budget')
+                .attr('class', 'legend_button')
                 .text("Budget")
                 .on("click", updateLegendAndChart);
             
@@ -445,7 +450,7 @@
                 .attr('x', xCircle)
                 .attr("y", height - 100 +30)
                 .attr("class", "circle_legend_title")
-                .text(radius_var + " (M)")
+                .text("International Gross (M)")
                 .attr("text-anchor", "middle")
             
             // Add one dot in the legend for each name.
