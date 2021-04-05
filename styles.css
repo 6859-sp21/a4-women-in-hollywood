@@ -15,7 +15,6 @@ body {
 h2 {
     margin-top: 30px;
     margin-bottom: 10px;
-
 }
 
 .two-col {
@@ -28,11 +27,6 @@ h2 {
     opacity: 1 !important;
     stroke: black;
     stroke-width: 1px;
-}
-
-#bubble_legend {
-    display: flex;
-    flex-direction: column-reverse;
 }
 
 .button_group {
@@ -49,7 +43,9 @@ h2 {
     border-style: none;
     border-color: none;
     opacity: 0.5;
+    margin: 2px;
 }
+
 
 .legend_button:hover {
     opacity: 1;
@@ -62,6 +58,9 @@ h2 {
 
 #bubble_legend {
     text-align: center;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
 }
 .tooltip { 
     position: absolute;
