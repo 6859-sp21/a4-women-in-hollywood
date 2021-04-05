@@ -227,6 +227,19 @@
                 .y(function(d) { return y(d) })
               )
 
+            var focus = svg.append("g")
+              .append("circle")
+              .style("fill", "none")
+              .attr("stroke", "black")
+              .attr("r", 8.5)
+              .style("opacity", 0)
+
+            var focusText = svg.append("g")
+              .append("text")
+              .style("opacity", 0)
+              .attr("text-anchor", "left")
+              .attr("alignment-baseline", "middle")
+
             function getDotColor(index) {
               year = indexToYear(index)
               // if (datum.hasOwnProperty("selected") && !datum.selected) {
@@ -247,6 +260,7 @@
 
             function yearLabel(early, end){
               svg.selectAll(".yearLabel").remove()
+              document.getElementById("bubbleYear").innerHTML = ""
               // console.log(early, end)
               if (earliestYear != early && latestYear != end){
                 if (end != early){
@@ -291,6 +305,27 @@
             svg.select("g.marks")
               .attr("class", "brush")
               .call(brush)
+              
+              .on('mouseover', function () {
+                focus.style("opacity", 1)
+                focusText.style("opacity", 1)
+              })
+              .on('mousemove', function (event, d) {
+                var i = Math.round(yearToIndex(brushToYear(event.pageX - 310)));
+                selectedData = moviesPercentPassed[i]
+                // console.log(event.pageX, "x:", i, ', y:', selectedData)
+                focus
+                  .attr("cx", x(indexToYear(i)))
+                  .attr("cy", y(selectedData))
+                focusText
+                  .html(Math.round(selectedData * 100) + "%")
+                  .attr("x", x(indexToYear(i)) - 20)
+                  .attr("y", y(selectedData) - 20)
+              })
+              .on('mouseout', function () {
+                focus.style("opacity", 0)
+                focusText.style("opacity", 0)
+              });
               
             // 11. add brush callback to handle brush event
             let brushedData = [];
