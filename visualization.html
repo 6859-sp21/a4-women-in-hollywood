@@ -479,23 +479,27 @@
                 }
                 const percentPassedLabel = bubble_legend_svg.append('text')
                   .attr("class", "percentPassed")
-                  .attr('x', 70)
+                  .attr('x', "50%")
                   .attr('y', margin.top + 30)
                   .attr('fill', 'gray')
                   .attr('font-family', 'Helvetica Neue, Arial')
                   // .attr('font-weight', 500)
                   .attr('font-size', 30)
                   .attr('text-align', 'center')
+                  .attr("dominant-baseline", "middle")
+                  .attr("text-anchor", "middle")
                   .text(passed+"%");
                 
                 const percentPassedYearLabel = bubble_legend_svg.append('text')
                   .attr("class", "percentPassed")
-                  // .attr('x', 70)
+                  .attr('x', "50%")
                   .attr('y', margin.top + 50)
                   .attr('fill', 'gray')
                   .attr('font-family', 'Helvetica Neue, Arial')
                   // .attr('font-weight', 500)
                   // .attr('font-size', 80)
+                  .attr("dominant-baseline", "middle")
+                  .attr("text-anchor", "middle")
                   .text(yearText);
               }
             }
