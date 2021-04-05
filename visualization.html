@@ -48,14 +48,12 @@
 
         // for the bubble chart
         var bubble_chart_width = 720,
-            bubble_chart_height = 650,
-            padding = 0.5, // separation between same-color nodes
-            clusterPadding = 1; // separation between different-color nodes
-           
+            bubble_chart_height = 650;
+            
         var w = bubble_chart_width, h = bubble_chart_height;
     
         // var color = d3.scaleOrdinal(d3.schemeCategory20);
-        var centerScale = d3.scalePoint().padding(1).range([0, w]);
+        // var centerScale = d3.scalePoint().padding(1).range([0, w]);
         var forceStrength = 5;
         
         var bubble_chart_svg = d3.select("#bubble_chart").append("svg")
@@ -72,8 +70,8 @@
                 )
                 .force("charge", d3.forceManyBody())
                 .force("y", d3.forceY().y(h / 2))
-                .force("x", d3.forceX().x(w / 2))
-                .stop();
+                .force("x", d3.forceX().x(w / 2));
+                // .stop();
             
         bubble_chart_svg.append("text")
             .attr("x", (width / 2))             
@@ -249,7 +247,7 @@
 
             // BUBBLE CHART BASED ON BRUSHED DATA
             //bubble chart datajoin
-            var radius_var = 'budget';
+            var radius_var = 'intgross';
             
             function dataJoinBubble(brushedData = []) {
                 // console.log(radius_var, "radius_var");
@@ -329,6 +327,11 @@
                     })
                 
                 function ticked() {
+                    // for (let i = 0; i < 5; i++) {
+                    //   simulation.tick();
+                    // }
+                    // console.log("tick");
+                    simulation.alphaTarget(1).restart();
                     bubbles
                         .attr('cx', d => d.x)
                         .attr('cy', d => d.y)
@@ -340,8 +343,9 @@
 
                 simulation
                         .nodes(brushedData)
-                        .on("tick", ticked);
-                simulation.tick(300);
+                        .on("tick", ticked)
+                        .restart()
+
             }
 
             function setScale(value) {
@@ -358,15 +362,17 @@
               .style("opacity", 0)
             
             function updateLegendAndChart(d) {
-              radius_var = d.target.name;
-              bubble_legend_svg.selectAll(".circle_legend_title").remove()
-              bubble_legend_svg.append("text")
-                .attr('x', xCircle)
-                .attr("y", height - 100 +30)
-                .text(radius_var + " (M)")
-                .attr("class", "circle_legend_title")
-                .attr("text-anchor", "middle")
-              dataJoinBubble(brushedData);
+              if (d.target.name != radius_var) {
+                radius_var = d.target.name;
+                bubble_legend_svg.selectAll(".circle_legend_title").remove()
+                bubble_legend_svg.append("text")
+                  .attr('x', xCircle)
+                  .attr("y", height - 100 +30)
+                  .text(radius_var + " (M)")
+                  .attr("class", "circle_legend_title")
+                  .attr("text-anchor", "middle")
+                dataJoinBubble(brushedData);
+              }
               console.log(brushedData, "brushed data");
               console.log(d.target.name, "new radius variable")
             }
@@ -454,8 +460,6 @@
                 .attr("r", 7)
                 .style("fill", function(d){
                     return setColor(d);})
-                .on('mouseover', highlight)
-                .on("mouseleave", noHighlight)
             
             function percentPassed(early, end, passed) {
               bubble_legend_svg.selectAll(".percentPassed").remove()
@@ -517,20 +521,14 @@
             // And when it is not hovered anymore
             function noHighlight (d){
                 d3.selectAll(".bubbles").style("opacity", 1)
-            }            
-
-            function clicked(event, d) {
-                d3.select(this).transition()
-                    .attr("r", d.r * 2)
-                .transition()
-                    .attr("r", d.r);
-            }
+            }           
 
             function dragstarted(mouse,node) {
                 // console.log("dragstarted ", "movie", node, "d", mouse)
-                if (!mouse.active) simulation.alpha(1).restart();
+                if (!mouse.active) simulation.alphaTarget(1).restart();
                 node.fx = mouse.x;
                 node.fy = mouse.y;
+                
             }
 
             function dragged(mouse,node) {
