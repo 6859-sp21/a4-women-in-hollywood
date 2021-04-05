@@ -30,22 +30,9 @@
         </div>
         <div id="bubble_legend" style="width:320px;height:420px;">
             <!-- This is where we will put our chart. -->
+            <div class="button_group"></div>
         </div>
     </div>
-    <style>
-        .two-col {
-            display: flex;
-            flex-direction: row;
-        }
-    </style>
-
-    <style>
-      .selected {
-        opacity: 1 !important;
-        stroke: black;
-        stroke-width: 1px;
-      }
-    </style>
 
     <script>
         // Load data from a URL. You can also have the json file downloaded.
@@ -95,15 +82,12 @@
             .style("font-size", "16px") 
             .text("Movies In Year");
 
-
         //Read the data
         d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
           .then(function (movies) {            
             // console.log("movies", movies[0]);
             years = [];
             yearRange = [earliestYear, latestYear]
-            // moviesPerYear = [];
-            // moviesPassedPerYear =[];
             moviesPercentPassed = [];
             totMovies = 0
             totPassed = 0
@@ -113,8 +97,6 @@
                 moviesPassedInYear = moviesInYear.filter(mov => mov.binary==="PASS");
                 numMoviesPassed = moviesPassedInYear.length;
                 
-                // moviesPerYear.push(numMovies);
-                // moviesPassedPerYear.push(numMoviesPassed);
                 moviesPercentPassed.push(numMoviesPassed/numMovies);
                 movies.push(year);
                 totMovies += numMovies
@@ -267,11 +249,13 @@
 
             // BUBBLE CHART BASED ON BRUSHED DATA
             //bubble chart datajoin
+            var radius_var = 'budget';
+            
             function dataJoinBubble(brushedData = []) {
-            //   console.log(brushedData)
+                // console.log(radius_var, "radius_var");
                 bubble_chart_svg.selectAll('*').remove(); 
                 brushedData.forEach(function(movie){
-                    movie.r = setScale(movie.intgross);
+                    movie.r = setScale(movie[radius_var]);
                     movie.x = w / 2;
                     movie.y = h / 2;
                     var txt = document.createElement("textarea");
@@ -300,10 +284,6 @@
                             .on("start", dragstarted)
                             .on("drag", dragged)
                             .on("end", dragended))
-                    // .on("click", clicked)
-                    // .on("mouseover", showTooltip )
-                    // .on("mousemove", moveTooltip )
-                    // .on("mouseleave", hideTooltip )
                     .on("mouseover", function(event, d)  {
                       tooltip.transition()
                         .duration(200)
@@ -377,8 +357,44 @@
               .attr("class", "tooltip")
               .style("opacity", 0)
             
+            function updateLegendAndChart(d) {
+              radius_var = d.target.name;
+              bubble_legend_svg.selectAll(".circle_legend_title").remove()
+              bubble_legend_svg.append("text")
+                .attr('x', xCircle)
+                .attr("y", height - 100 +30)
+                .text(radius_var + " (M)")
+                .attr("class", "circle_legend_title")
+                .attr("text-anchor", "middle")
+              dataJoinBubble(brushedData);
+              console.log(brushedData, "brushed data");
+              console.log(d.target.name, "new radius variable")
+            }
+                
+            d3.select(".button_group")
+              .append("button")
+                .attr('x', xLabel)
+                .attr('y', margin.top + 300)
+                .attr('name', 'domgross')
+                .text("Domestic Gross")
+                .on("click", updateLegendAndChart);
+            d3.select(".button_group")
+              .append("button")
+                .attr('x', xLabel)
+                .attr('y', margin.top + 300)
+                .attr('name', 'intgross')
+                .text("International Gross")
+                .on("click", updateLegendAndChart);
+            d3.select(".button_group")
+              .append("button")
+                .attr('x', xLabel)
+                .attr('y', margin.top + 300)
+                .attr('name', 'budget')
+                .text("Budget")
+                .on("click", updateLegendAndChart);
+            
+                
 
-            // legend
             var valuesToShow = [10000000, 100000000, 1000000000]
             var xCircle = 100
             var xLabel = 240
@@ -422,9 +438,10 @@
             bubble_legend_svg.append("text")
                 .attr('x', xCircle)
                 .attr("y", height - 100 +30)
-                .text("International Gross (M)")
+                .attr("class", "circle_legend_title")
+                .text(radius_var + " (M)")
                 .attr("text-anchor", "middle")
-
+            
             // Add one dot in the legend for each name.
             var size = 20
             var allgroups = ["PASS", "FAIL"]
