@@ -19,7 +19,7 @@
       </div>
       <div class="movie_result hidden"></div>
     </div>
-    <p>Explore more movies below.</p>
+    <p style="padding-top: 20px">Explore more movies below.</p>
     <h2>Percentage of Movies Passing the Bechdel Test</h2>
     <p>From 1973 to 2013.</p>
     <div id="line_chart">
@@ -58,6 +58,23 @@
                 let selectedMovie = movies.filter(mov => mov.title == selectData)[0];
                 console.log(selectedMovie);
                 result += `<h3 class="`+selectedMovie.binary +`"> This movie `+ selectedMovie.binary + `ED. </h3>`
+                if (selectedMovie.binary === "FAIL") {
+                  result += "<p class='FAIL'>"
+                  switch (selectedMovie.clean_test) {
+                    case "men":
+                      result += "The women only talked about men"
+                      break;
+                    case "nowomen":
+                      result += "There were no women in the movie"
+                      break;
+                    case "notalk":
+                      result += "The women did not talk at all"
+                      break;
+                    case "dubious":
+                      result += "There was no consensus among viewers of passing"
+                  }
+                  result += "</p>"
+                }
                 result += `<p> Budget: $`+selectedMovie.budget+`</p>`
                 result += `<p> Grossed (domestic): $`+selectedMovie.domgross+`</p>`     
                 result += `<p> Grossed (international): $`+selectedMovie.intgross+`</p>`
@@ -237,7 +254,13 @@
             var focusText = svg.append("g")
               .append("text")
               .style("opacity", 0)
-              .attr("text-anchor", "left")
+              .attr("text-anchor", "middle")
+              .attr("alignment-baseline", "middle")
+            
+            var focusTextYear = svg.append("g")
+              .append("text")
+              .style("opacity", 0)
+              .attr("text-anchor", "middle")
               .attr("alignment-baseline", "middle")
 
             function getDotColor(index) {
@@ -309,6 +332,7 @@
               .on('mouseover', function () {
                 focus.style("opacity", 1)
                 focusText.style("opacity", 1)
+                focusTextYear.style("opacity", 1)
               })
               .on('mousemove', function (event, d) {
                 var i = Math.round(yearToIndex(brushToYear(event.pageX - 310)));
@@ -319,12 +343,17 @@
                   .attr("cy", y(selectedData))
                 focusText
                   .html(Math.round(selectedData * 100) + "%")
-                  .attr("x", x(indexToYear(i)) - 20)
+                  .attr("x", x(indexToYear(i))-10)
                   .attr("y", y(selectedData) - 20)
+                focusTextYear
+                  .html(indexToYear(i))
+                  .attr("x", x(indexToYear(i))-10)
+                  .attr("y", y(selectedData) - 40)
               })
               .on('mouseout', function () {
                 focus.style("opacity", 0)
                 focusText.style("opacity", 0)
+                focusTextYear.style("opacity", 0)
               });
               
             // 11. add brush callback to handle brush event
@@ -394,11 +423,28 @@
                       tooltip.transition()
                         .duration(200)
                         .style("opacity", 0.8)
-                      tooltip.html("<b>" + d.title + 
-                                   "</b><br>(<i>" + d.year + 
-                                   "</i>)<br><b>Budget</b>: $" + d.budget +
-                                   "<br><b>Grossed (domestic)</b>: $" + d.domgross +
-                                   "<br><b>Grossed (international)</b>: $" + d.intgross )
+                      tooltipHTML = "<b>" + d.title +
+                        "</b> (<i>" + d.year +
+                        "</i>)<br><b>Budget</b>: $" + d.budget +
+                        "<br><b>Grossed (domestic)</b>: $" + d.domgross +
+                        "<br><b>Grossed (international)</b>: $" + d.intgross
+                      if (d.binary === "FAIL"){
+                        tooltipHTML += "<br><b>FAIL</b> because "
+                        switch(d.clean_test){
+                          case "men":
+                            tooltipHTML += "women only talked about men"
+                            break;
+                          case "nowomen":
+                            tooltipHTML += "no women in movie"
+                            break;
+                          case "notalk":
+                            tooltipHTML += "women did not talk"
+                            break;
+                          case "dubious":
+                            tooltipHTML += "no consensus among viewers of passing"
+                        }
+                      }
+                      tooltip.html(tooltipHTML)
                         .style("left", (event.pageX) + "px")
                         .style("top", (event.pageY) + "px")
                         // .style("z", 1)
