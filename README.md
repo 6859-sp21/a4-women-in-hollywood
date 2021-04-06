@@ -14,3 +14,15 @@ However, we have quickly come into consensus how stacked barcharts are perhaps n
 With the foundation of our interative visualization established, we went about adding interaction. We decided to take advantage of D3's brushing tool to help select some range of years in the line chart to display as bubbles int he packed bubbles chart. We also took decided to use tooltips to provide further levels of specificity that is not entirely essential to the visualization.
 
 Finally, to better create a narrative, we have added a component on our page that quickly displays where the audience's favorite movie from 1973 to 2013 passes the Bechdel test. This serves to create a warm introduction between us (the visualizers) and the audience before diving into the data visualizations.
+
+## An overview of your development process
+
+Jennifer:
+* Bubble chart
+* Styling
+* Favorite movies form
+
+Alvin:
+* Line chart
+* Brushing
+* Tooltips
