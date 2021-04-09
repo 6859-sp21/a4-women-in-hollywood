@@ -335,7 +335,8 @@
                 focusTextYear.style("opacity", 1)
               })
               .on('mousemove', function (event, d) {
-                var i = Math.round(yearToIndex(brushToYear(event.pageX - 310)));
+                // console.log(d3.pointer(event)[0], brushToYear(d3.pointer(event)[0]))
+                var i = Math.round(yearToIndex(brushToYear(d3.pointer(event)[0])));
                 selectedData = moviesPercentPassed[i]
                 // console.log(event.pageX, "x:", i, ', y:', selectedData)
                 focus
@@ -447,7 +448,6 @@
                       tooltip.html(tooltipHTML)
                         .style("left", (event.pageX) + "px")
                         .style("top", (event.pageY) + "px")
-                        // .style("z", 1)
 
                       d3.select(this)
                         .style("stroke", "black")
@@ -458,7 +458,6 @@
                         .style("opacity", 0)
                         .style("top", "-1000px")
                         .style("left", "-1000px")
-                        // .style("z", -100)
 
                       d3.select(this)
                         .style("stroke", setColor(d.binary))
