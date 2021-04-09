@@ -20,8 +20,8 @@
       <div class="movie_result hidden"></div>
     </div>
     <p style="padding-top: 20px">Explore more movies below.</p>
-    <h2>Percentage of Movies Passing the Bechdel Test</h2>
-    <p>From 1973 to 2013.</p>
+    <h2>Percentage of Movies Passing the Bechdel Test from 1973 to 2013</h2>
+    <p><i>Click and drag to select years to explore</i></p>
     <div id="line_chart">
       <!-- This is where we will put our line chart. -->
     </div>
@@ -56,7 +56,7 @@
             d3.csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/bechdel/movies.csv', d3.autoType)
               .then(function (movies) {
                 let selectedMovie = movies.filter(mov => mov.title == selectData)[0];
-                console.log(selectedMovie);
+                // console.log(selectedMovie);
                 result += `<h3 class="`+selectedMovie.binary +`"> This movie `+ selectedMovie.binary + `ED. </h3>`
                 if (selectedMovie.binary === "FAIL") {
                   result += "<p class='FAIL'>"
@@ -75,9 +75,9 @@
                   }
                   result += "</p>"
                 }
-                result += `<p> Budget: $`+selectedMovie.budget+`</p>`
-                result += `<p> Grossed (domestic): $`+selectedMovie.domgross+`</p>`     
-                result += `<p> Grossed (international): $`+selectedMovie.intgross+`</p>`
+                result += `<p> Budget: $`+(selectedMovie.budget).toLocaleString('en')+`</p>`
+                result += `<p> Grossed (domestic): $`+(selectedMovie.domgross).toLocaleString('en')+`</p>`     
+                result += `<p> Grossed (international): $`+(selectedMovie.intgross).toLocaleString('en')+`</p>`
                 resultBox.innerHTML = result;
               });
             searchWrapper.classList.remove("active");
@@ -265,15 +265,27 @@
 
             function getDotColor(index) {
               year = indexToYear(index)
-              // if (datum.hasOwnProperty("selected") && !datum.selected) {
-                //   return "lightgray";
-                // }
+              if (yearRange[0] == earliestYear && yearRange[1] == latestYear){
+                return 0.5
+              }
               if (Math.floor(year) >= yearRange[0] && Math.floor(year) <= yearRange[1]) {
-                // console.log("Index", year)
-                return 0.7
+                return 1
               }
               return 0.25;
             };
+
+            function bubbleDirections() {
+              if (yearRange[0] == earliestYear && yearRange[1] == latestYear) {
+                bubble_chart_svg.append("text")
+                  .classed("bubbleDirections", true)
+                  .attr("x", (w / 2))
+                  .attr("y", (h / 2))
+                  .attr("text-anchor", "middle")
+                  .style("font-size", "24px")
+                  .text("Click and drag the line chart to select years to explore");
+              }
+            }
+            bubbleDirections()
 
             function chartsDataJoin(rawData = movies) {
               dataJoin(rawData);
@@ -314,7 +326,7 @@
                 .join('path')
                 .classed('country', true) // can reference these marks like css, i.e. 'path.country'
                 .attr('transform', (d, i) => `translate(${x(indexToYear(i))}, ${y(d)})`)
-                .attr('fill', "red")
+                .attr('fill', "steelblue")
                 .attr('fill-opacity', (d, i) => getDotColor(i))
                 .attr('d', d => symbol())
             }
@@ -373,12 +385,12 @@
                 // console.log("PMP", brushedData.length, brushedData.filter(mov => mov.binary === "PASS"))
               } else {
                 yearRange = [earliestYear, latestYear]
-                // console.log("Else", yearRange)
               }
               
               yearLabel(yearRange[0], yearRange[1])
               percentPassed(yearRange[0], yearRange[1], percentMoviesPassed)
               chartsDataJoin(brushedData);
+              bubbleDirections()
             };
               
             document.getElementById("line_chart").appendChild(svg.node());
@@ -426,9 +438,9 @@
                         .style("opacity", 0.8)
                       tooltipHTML = "<b>" + d.title +
                         "</b> (<i>" + d.year +
-                        "</i>)<br><b>Budget</b>: $" + d.budget +
-                        "<br><b>Grossed (domestic)</b>: $" + d.domgross +
-                        "<br><b>Grossed (international)</b>: $" + d.intgross
+                        "</i>)<br><b>Budget</b>: $" + (d.budget).toLocaleString('en') +
+                        "<br><b>Grossed (domestic)</b>: $" + (d.domgross).toLocaleString('en') +
+                        "<br><b>Grossed (international)</b>: $" + (d.intgross).toLocaleString('en')
                       if (d.binary === "FAIL"){
                         tooltipHTML += "<br><b>FAIL</b> because "
                         switch(d.clean_test){
@@ -502,7 +514,13 @@
             }
 
             function setScale(value) {
-                return Math.sqrt(value*0.00001 / Math.PI)
+              if (radius_var == 'intgross'){
+                return Math.sqrt(value * 0.00001 / Math.PI)
+              } else if (radius_var == 'domgross'){
+                return Math.sqrt(value * 0.0000366 / Math.PI)
+              } else if (radius_var == 'budget'){
+                return Math.sqrt(value * 0.0000655 / Math.PI)
+              }
             }
 
             // Add a scale for bubble color
@@ -515,14 +533,18 @@
               .style("opacity", 0)
             
             function updateLegendAndChart(d) {
+              // console.log("HELLO", d.target.name)
               if (d.target.name != radius_var) {
                 let legend_title;
                 if (d.target.name == "intgross") {
                   legend_title = "International Gross (M)";
+                  valuesToShow = [10000000, 100000000, 500000000, 1000000000]
                 } else if (d.target.name == "domgross") {
                   legend_title = "Domestic Gross (M)";
+                  valuesToShow = [10000000, 100000000, 500000000]
                 } else {
                   legend_title = "Budget (M)";
+                  valuesToShow = [10000000, 100000000, 500000000]
                 }
                 radius_var = d.target.name;
                 bubble_legend_svg.selectAll(".circle_legend_title").remove()
@@ -534,8 +556,9 @@
                   .attr("text-anchor", "middle")
                 dataJoinBubble(brushedData);
               }
-              console.log(brushedData, "brushed data");
-              console.log(d.target.name, "new radius variable")
+              // console.log(brushedData, "brushed data");
+              // console.log(d.target.name, "new radius variable")
+              legendMaking()
             }
                 
             d3.select(".button_group")
@@ -560,43 +583,50 @@
                 
 
             var valuesToShow = [10000000, 100000000, 1000000000]
-            var xCircle = 100
+            var xCircle = 120
             var xLabel = 240
-            bubble_legend_svg
+            function legendMaking(){
+              bubble_legend_svg.selectAll(".circleMaking").remove()
+              bubble_legend_svg
                 .selectAll("legend")
                 .data(valuesToShow)
                 .enter()
                 .append("circle")
-                    .attr("cx", xCircle)
-                    .attr("cy", function(d){ return height - 100 - setScale(d) } )
-                    .attr("r", function(d){ return setScale(d) })
-                    .style("fill", "none")
-                    .attr("stroke", "black")
+                .classed("circleMaking", true)
+                .attr("cx", xCircle)
+                .attr("cy", function (d) { return height - 100 - setScale(d) })
+                .attr("r", function (d) { return setScale(d) })
+                .style("fill", "none")
+                .attr("stroke", "black")
 
-            // Add legend: segments
-            bubble_legend_svg
+              // Add legend: segments
+              bubble_legend_svg
                 .selectAll("legend")
                 .data(valuesToShow)
                 .enter()
                 .append("line")
-                    .attr('x1', function(d){ return xCircle + setScale(d)} )
-                    .attr('x2', xLabel)
-                    .attr('y1', function(d){ return height - 100 - setScale(d) } )
-                    .attr('y2', function(d){ return height - 100 - setScale(d) } )
-                    .attr('stroke', 'black')
-                    .style('stroke-dasharray', ('2,2'))
+                .classed("circleMaking", true)
+                .attr('x1', function (d) { return xCircle + setScale(d) })
+                .attr('x2', xLabel)
+                .attr('y1', function (d) { return height - 100 - setScale(d) })
+                .attr('y2', function (d) { return height - 100 - setScale(d) })
+                .attr('stroke', 'black')
+                .style('stroke-dasharray', ('2,2'))
 
-            // Add legend: labels
-            bubble_legend_svg
+              // Add legend: labels
+              bubble_legend_svg
                 .selectAll("legend")
                 .data(valuesToShow)
                 .enter()
                 .append("text")
-                    .attr('x', xLabel)
-                    .attr('y', function(d){ return height - 100 - setScale(d) } )
-                    .text( function(d){ return d/1000000 } )
-                    .style("font-size", 10)
-                    .attr('alignment-baseline', 'middle')
+                .classed("circleMaking", true)
+                .attr('x', xLabel)
+                .attr('y', function (d) { return height - 100 - setScale(d) })
+                .text(function (d) { return d / 1000000 })
+                .style("font-size", 10)
+                .attr('alignment-baseline', 'middle')
+            }
+            legendMaking()
 
             // Legend title
             bubble_legend_svg.append("text")
