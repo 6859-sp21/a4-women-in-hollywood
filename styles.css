@@ -188,3 +188,9 @@ h2 {
     color: #db8181;
     padding-bottom: 8px;
 }
+
+.legend_caption {
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
