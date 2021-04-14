@@ -21,7 +21,8 @@
     </div>
     <p style="padding-top: 20px">Explore more movies below.</p>
     <h2>Percentage of Movies Passing the Bechdel Test from 1973 to 2013</h2>
-    <p><i>Click and drag to select years to explore</i></p>
+    <p><i>Click and drag to select years to explore <a href="#bubbleYear">below</a></i></p>
+    <button id="resetButton" style="text-align: right;">CLEAR SELECTION</button>
     <div id="line_chart">
       <!-- This is where we will put our line chart. -->
     </div>
@@ -244,6 +245,20 @@
                 .y(function(d) { return y(d) })
               )
 
+            d3.select("#resetButton")
+              .on("click", function(){
+                yearRange = [earliestYear, latestYear]
+                allgroupsCount = ["", ""]
+
+                yearLabel(yearRange[0], yearRange[1])
+                percentPassed(yearRange[0], yearRange[1], percentMoviesPassed)
+                chartsDataJoin([]);
+                bubbleDirections()
+                bubbleLegendCount()
+
+                d3.selectAll(".selection").attr("width", "0");
+              });
+
             var focus = svg.append("g")
               .append("circle")
               .style("fill", "none")
@@ -378,9 +393,14 @@
                 x1 = coords[1]
 
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
-                brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-                percentMoviesPassed = (brushedData.filter(mov => mov.binary === "PASS").length)/(brushedData.length)
-                allgroupsCount = [brushedData.filter(mov => mov.binary === "PASS").length, brushedData.filter(mov => mov.binary === "FAIL").length]
+                if (yearRange[0] == earliestYear && yearRange[1] == latestYear){
+                  allgroupsCount = ["",""]
+                  brushedData = []
+                } else {
+                  brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
+                  percentMoviesPassed = (brushedData.filter(mov => mov.binary === "PASS").length)/(brushedData.length)
+                  allgroupsCount = [brushedData.filter(mov => mov.binary === "PASS").length, brushedData.filter(mov => mov.binary === "FAIL").length]
+                }
               } else {
                 yearRange = [earliestYear, latestYear]
                 allgroupsCount = ["", ""]
@@ -651,8 +671,7 @@
             
             function percentPassed(early, end, passed) {
               bubble_legend_svg.selectAll(".percentPassed").remove()
-              // console.log("passed", passed)
-              if (earliestYear != early && latestYear != end) {
+              if (earliestYear != early || latestYear != end) {
                 passed = (passed*100).toFixed(2)
 
                 if (end != early) {
