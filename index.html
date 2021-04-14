@@ -379,18 +379,18 @@
 
                 yearRange = [Math.ceil(brushToYear(x0)), Math.floor(brushToYear(x1))]
                 brushedData = movies.filter(mov => mov.year >= yearRange[0] && mov.year <= yearRange[1])
-                // console.log("bd", brushedData)
-                // console.log("bd length:", brushedData.length)
                 percentMoviesPassed = (brushedData.filter(mov => mov.binary === "PASS").length)/(brushedData.length)
-                // console.log("PMP", brushedData.length, brushedData.filter(mov => mov.binary === "PASS"))
+                allgroupsCount = [brushedData.filter(mov => mov.binary === "PASS").length, brushedData.filter(mov => mov.binary === "FAIL").length]
               } else {
                 yearRange = [earliestYear, latestYear]
+                allgroupsCount = ["", ""]
               }
               
               yearLabel(yearRange[0], yearRange[1])
               percentPassed(yearRange[0], yearRange[1], percentMoviesPassed)
               chartsDataJoin(brushedData);
               bubbleDirections()
+              bubbleLegendCount()
             };
               
             document.getElementById("line_chart").appendChild(svg.node());
@@ -644,7 +644,7 @@
                 .enter()
                 .append("circle")
                 .attr("cx", 100)
-                .attr("cy", function(d,i){ return 100 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("cy", function(d,i){ return 110 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("r", 7)
                 .style("fill", function(d){
                     return setColor(d);})
@@ -676,7 +676,7 @@
                 const percentPassedYearLabel = bubble_legend_svg.append('text')
                   .attr("class", "percentPassed")
                   .attr('x', "50%")
-                  .attr('y', margin.top + 50)
+                  .attr('y', margin.top + 60)
                   .attr('fill', 'gray')
                   .attr('font-family', 'Helvetica Neue, Arial')
                   // .attr('font-weight', 500)
@@ -688,26 +688,40 @@
             }
 
             // Add labels beside legend dots
-            bubble_legend_svg.selectAll("mylabels")
+            allgroupsCount = ["", ""]
+            function bubbleLegendCount(){
+              bubble_legend_svg.selectAll(".PFLabel").remove()
+
+              bubble_legend_svg.selectAll("mylabels")
                 .data(allgroups)
                 .enter()
                 .append("text")
-                .attr("x", 100 + size*.8)
-                .attr("y", function(d,i){ return 90 + i * (size + 5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
-                .style("fill", function(d){ return setColor(d)})
-                .text(function(d){ return d})
+                .classed("PFLabel", true)
+                .attr("x", 100 + size * .8)
+                .attr("y", function (d, i) { return 105 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .style("fill", function (d) { return setColor(d) })
+                .text(function (d, i) { 
+                  if (allgroupsCount[i] != ""){
+                    return d + " (" + allgroupsCount[i] + ")" 
+                  } else {
+                    return d
+                  }
+                })
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
                 .on("mouseover", highlight)
                 .on("mouseleave", noHighlight)
+            }
+            bubbleLegendCount()
 
             // What to do when one group is hovered
             function highlight (d){
                 // console.log("highlight?" , d)
                 // reduce opacity of all groups
-                d3.selectAll(".bubbles").style("opacity", .05)
+                d3.selectAll(".bubbles").style("opacity", .06)
                 // except the one that is hovered
-                d3.selectAll("."+d.target.innerHTML).style("opacity", 1)
+                splitter = d.target.innerHTML.split(" ")[0]
+                d3.selectAll("."+splitter).style("opacity", 1)
             }
 
             // And when it is not hovered anymore
