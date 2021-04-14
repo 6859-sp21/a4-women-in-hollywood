@@ -9,11 +9,11 @@
 
     <h2>What is the Bechdel Test?</h2>
     <p>The Bechdel Test, or Bechdel-Wallace Test, sometimes called the Bechdel Rule is a simple test which names the following three criteria: 
-      <ol>
+      <ul>
         <li>(1) it has to have at least two women in it, who </li>
         <li>(2) who talk to each other, about </li>
         <li>(3) something besides a man.</li>
-      </ol>
+      </ul>
     </p>
     <p>Unfortunately, a lot of big box office hits still don't pass this test. Explore the following visualizations to learn more!</p>
 
@@ -307,7 +307,6 @@
 
             function chartsDataJoin(rawData = movies) {
               dataJoin(rawData);
-              // console.log(rawData, "brushed data");
               dataJoinBubble(rawData);
             };
 
@@ -674,7 +673,7 @@
             
             function percentPassed(early, end, passed) {
               bubble_legend_svg.selectAll(".percentPassed").remove()
-              if (earliestYear != early || latestYear != end) {
+              if (!isNaN(passed) && (earliestYear != early || latestYear != end)) {
                 passed = (passed*100).toFixed(2)
 
                 if (end != early) {

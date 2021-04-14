@@ -194,3 +194,17 @@ h2 {
   font-style: italic;
   text-align: center;
 }
+
+#resetButton {
+  padding: 2px 4px;
+  margin-top: 12px;
+}
+
+p {
+  margin-bottom:12px;
+}
+
+
+li{
+  list-style-type: none;
+}
