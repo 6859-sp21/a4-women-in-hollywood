@@ -28,3 +28,7 @@ Alvin:
 * Line chart
 * Brushing
 * Tooltips
+
+The work in total took about 40 total hours combined, and was split evenly between teammates. The work that took the longest time was the fine-tuning of brushing and tooltips, and debugging the animations for the bubble chart.
+
+Data Source: https://github.com/fivethirtyeight/data/tree/master/bechdel from FiveThirtyEight.
